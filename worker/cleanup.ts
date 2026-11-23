@@ -33,11 +33,12 @@ export interface CleanupResult {
   catalogSalts: number;
   catalogClients: number;
   emailChanges: number;
+  githubStates: number;
 }
 
 export async function cleanup(env: CleanupEnv, now = Date.now()): Promise<CleanupResult> {
   const shares = await deleteExpiredShares(env, { now, limit: SHARE_BATCH });
-  const [deviceCodes, signInChallenges, emailTokens, webauthnChallenges, bugReports, adminEvents, catalogSalts, catalogClients, emailChanges] = await env.DB.batch([
+  const [deviceCodes, signInChallenges, emailTokens, webauthnChallenges, bugReports, adminEvents, catalogSalts, catalogClients, emailChanges, githubStates] = await env.DB.batch([
     // A day after expiry, as in device.ts, so a late poll still gets expired_token.
     env.DB.prepare('DELETE FROM device_codes WHERE expires_at < ?').bind(now - DAY),
     env.DB.prepare('DELETE FROM sign_in_challenges WHERE expires_at < ?').bind(now),
@@ -49,6 +50,7 @@ export async function cleanup(env: CleanupEnv, now = Date.now()): Promise<Cleanu
     env.DB.prepare('DELETE FROM catalog_salts WHERE day < ?').bind(dayOf(now)),
     env.DB.prepare('DELETE FROM catalog_clients WHERE day < ?').bind(dayOf(now - CATALOG_CLIENT_DAYS * DAY)),
     env.DB.prepare('DELETE FROM email_changes WHERE expires_at < ?').bind(now),
+    env.DB.prepare('DELETE FROM github_states WHERE expires_at < ?').bind(now),
   ]);
   let bugReportsIndexed = 0;
   try {
@@ -68,5 +70,6 @@ export async function cleanup(env: CleanupEnv, now = Date.now()): Promise<Cleanu
     catalogSalts: catalogSalts.meta.changes,
     catalogClients: catalogClients.meta.changes,
     emailChanges: emailChanges.meta.changes,
+    githubStates: githubStates.meta.changes,
   };
 }

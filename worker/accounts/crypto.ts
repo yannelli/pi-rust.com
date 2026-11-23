@@ -42,6 +42,11 @@ export async function sha256(text: string): Promise<string> {
   return hex(new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(text))));
 }
 
+/** The PKCE S256 code challenge of a code verifier: base64url of its SHA-256 (RFC 7636). */
+export async function pkceChallenge(verifier: string): Promise<string> {
+  return base64url(new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(verifier))));
+}
+
 async function hmacKey(secret: string): Promise<CryptoKey> {
   return crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
 }

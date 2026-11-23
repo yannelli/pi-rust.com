@@ -43,6 +43,7 @@ interface UserListRow {
   shares: number;
   tokens: number;
   last_seen_at: number | null;
+  github_login: string | null;
 }
 
 function userJson(row: UserListRow, me: string) {
@@ -58,18 +59,19 @@ function userJson(row: UserListRow, me: string) {
     passkeys: count(row.passkeys),
     shares: count(row.shares),
     cliTokens: count(row.tokens),
+    github: row.github_login,
     you: row.id === me,
   };
 }
 
-/** GET /api/admin/users?q=&filter=all|admins|suspended|unverified&offset= */
+/** GET /api/admin/users?q=&filter=all|admins|suspended|unverified&offset=. `q` matches the address or the GitHub username. */
 export async function listUsers(c: AdminContext): Promise<Response> {
   const { user: me } = await requireAdmin(c);
   const q = searchOf(c);
   const filter = choiceOf(c, 'filter', FILTERS);
   const offset = offsetOf(c);
-  const where = `${FILTER_SQL[filter]}${q ? " AND u.email LIKE ? ESCAPE '\\'" : ''}`;
-  const binds = q ? [contains(q)] : [];
+  const where = `${FILTER_SQL[filter]}${q ? " AND (u.email LIKE ? ESCAPE '\\' OR g.login LIKE ? ESCAPE '\\')" : ''}`;
+  const binds = q ? [contains(q), contains(q)] : [];
   const [{ results }, total] = await Promise.all([
     c.env.DB.prepare(
       `SELECT u.id, u.email, u.email_verified_at, u.created_at, u.role, u.suspended_at, u.totp_enabled_at,
@@ -77,12 +79,13 @@ export async function listUsers(c: AdminContext): Promise<Response> {
         (SELECT COUNT(*) FROM shares WHERE user_id = u.id) AS shares,
         (SELECT COUNT(*) FROM cli_tokens WHERE user_id = u.id) AS tokens,
         MAX(COALESCE((SELECT MAX(last_seen_at) FROM sessions WHERE user_id = u.id), 0),
-            COALESCE((SELECT MAX(last_used_at) FROM cli_tokens WHERE user_id = u.id), 0)) AS last_seen_at
-       FROM users u WHERE ${where} ORDER BY u.created_at DESC, u.id LIMIT ? OFFSET ?`,
+            COALESCE((SELECT MAX(last_used_at) FROM cli_tokens WHERE user_id = u.id), 0)) AS last_seen_at,
+        g.login AS github_login
+       FROM users u LEFT JOIN github_accounts g ON g.user_id = u.id WHERE ${where} ORDER BY u.created_at DESC, u.id LIMIT ? OFFSET ?`,
     )
       .bind(...binds, PAGE_SIZE + 1, offset)
       .all<UserListRow>(),
-    c.env.DB.prepare(`SELECT COUNT(*) AS n FROM users u WHERE ${where}`)
+    c.env.DB.prepare(`SELECT COUNT(*) AS n FROM users u LEFT JOIN github_accounts g ON g.user_id = u.id WHERE ${where}`)
       .bind(...binds)
       .first<{ n: number }>(),
   ]);
@@ -104,7 +107,7 @@ function notAdmin(user: User): void {
 
 /** Ends every browser session, CLI token, and pending sign-in of an account. */
 function signOutStatements(c: AdminContext, userId: string) {
-  return ['sessions', 'cli_tokens', 'sign_in_challenges', 'webauthn_challenges', 'device_codes'].map((table) =>
+  return ['sessions', 'cli_tokens', 'sign_in_challenges', 'webauthn_challenges', 'github_states', 'device_codes'].map((table) =>
     c.env.DB.prepare(`DELETE FROM ${table} WHERE user_id = ?`).bind(userId),
   );
 }

@@ -6,17 +6,21 @@
   <form class="dialog__form" method="dialog" novalidate data-reauth-form>
     <div class="dialog__body">
       <h2 id="reauth-title">Confirm it’s you</h2>
-      <p>Enter your password to continue.</p>
-      <div class="field">
+      <p data-reauth-text>Enter your password to continue.</p>
+      <div class="field" data-reauth-password>
         <label for="reauth-password">Password</label>
         <input class="input" id="reauth-password" name="password" type="password" autocomplete="current-password" aria-describedby="reauth-password-error" required />
         <p class="field__error" id="reauth-password-error" role="alert"></p>
       </div>
+      <p class="notice notice--error" role="alert" data-form-error></p>
     </div>
     <div class="dialog__foot">
-      <button class="link-button" type="button" data-reauth-passkey hidden>Use a passkey</button>
+      <div class="dialog__ways">
+        <button class="link-button" type="button" data-reauth-passkey hidden>Use a passkey</button>
+        <button class="link-button" type="button" data-reauth-github hidden>Use GitHub</button>
+      </div>
       <button class="btn btn--secondary" type="button" data-reauth-cancel>Cancel</button>
-      <button class="btn btn--primary" type="submit">Confirm</button>
+      <button class="btn btn--primary" type="submit" data-reauth-submit>Confirm</button>
     </div>
   </form>
 </dialog>

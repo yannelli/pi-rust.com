@@ -15,7 +15,7 @@ pi-rust.com is a static [Astro](https://astro.build) site on a Cloudflare Worker
 
 - **Pages.** Home, install, benchmarks, changelog, FAQ, and the docs. The docs come from the pi-rust repository at each release, and a new release reaches the site on its own.
 - **Install scripts.** `/install.sh` and `/install.ps1`, served unchanged from the pi-rust repository.
-- **Accounts and sharing.** Accounts with passkeys and two-step verification, the pi CLI sign-in, and shared sessions at `/s/<id>`.
+- **Accounts and sharing.** Accounts with GitHub sign-in, passkeys, and two-step verification, the pi CLI sign-in, and shared sessions at `/s/<id>`.
 - **Admin area.** Stats, moderation, and the bug report inbox, at `/admin/`.
 - **Legal pages.** The privacy policy and Terms of Service, at `/privacy/` and `/terms/`. Sign-up requires accepting the Terms.
 - **pi CLI endpoints.** Bug reports, opt-in install telemetry, and the model catalog.

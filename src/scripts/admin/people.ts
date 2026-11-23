@@ -17,6 +17,8 @@ interface Person {
   passkeys: number;
   shares: number;
   cliTokens: number;
+  /** The username of the connected GitHub account, or null. */
+  github: string | null;
   you: boolean;
 }
 
@@ -35,6 +37,7 @@ function row(person: Person): HTMLLIElement {
     person.lastActiveAt ? `Active ${relativeTime(person.lastActiveAt)}` : 'Never active',
     plural(person.shares, 'share'),
     person.cliTokens ? plural(person.cliTokens, 'CLI token') : null,
+    person.github ? `GitHub ${person.github}` : null,
     twoStep ? 'Two-step on' : null,
   );
   const item = el('li', {}, avatar(person.email), el('div', { className: 'row__text' }, title, el('span', { className: 'row__meta' }, details)));
@@ -137,7 +140,7 @@ const list = new AdminList<Person>({
   key: 'users',
   filterParam: 'filter',
   row,
-  empty: (searching) => (searching ? emptyRow('No matching accounts', 'Try another address or filter.') : emptyRow('No accounts yet', 'Accounts appear here when people sign up.')),
+  empty: (searching) => (searching ? emptyRow('No matching accounts', 'Try another address, GitHub username, or filter.') : emptyRow('No accounts yet', 'Accounts appear here when people sign up.')),
   count: (total) => plural(total, 'account'),
 });
 

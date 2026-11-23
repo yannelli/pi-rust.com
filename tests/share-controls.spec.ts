@@ -353,7 +353,7 @@ test('the hourly cleanup deletes expired shares and old sign-in rows', async ({ 
   // this one may delete the dated code first. Either way it is gone.
   const deleted = await run();
   // A bug report uploaded by a test beside this one may be indexed by this run before its own row is written.
-  expect(deleted).toEqual({ shares: 2, deviceCodes: expect.any(Number), signInChallenges: 0, emailTokens: 1, webauthnChallenges: 0, bugReports: 0, bugReportsIndexed: expect.any(Number), adminEvents: 0, catalogSalts: 0, catalogClients: 0, emailChanges: 0 });
+  expect(deleted).toEqual({ shares: 2, deviceCodes: expect.any(Number), signInChallenges: 0, emailTokens: 1, webauthnChallenges: 0, bugReports: 0, bugReportsIndexed: expect.any(Number), adminEvents: 0, catalogSalts: 0, catalogClients: 0, emailChanges: 0, githubStates: 0 });
   expect(deleted.deviceCodes).toBeLessThanOrEqual(1);
   const poll = await (await cliClient(playwright, baseURL!)).post('/oauth/token', {
     form: { grant_type: 'urn:ietf:params:oauth:grant-type:device_code', device_code: grant.device_code, client_id: 'pi-cli' },
@@ -363,7 +363,7 @@ test('the hourly cleanup deletes expired shares and old sign-in rows', async ({ 
   expect(shares.map((share: Share) => share.id)).toEqual([lasting.id]);
   expect((await cli.get(`/s/${first.id}`)).status()).toBe(404);
   expect((await cli.get(`/s/${lasting.id}`)).status()).toBe(200);
-  expect(await run()).toEqual({ shares: 0, deviceCodes: 0, signInChallenges: 0, emailTokens: 0, webauthnChallenges: 0, bugReports: 0, bugReportsIndexed: expect.any(Number), adminEvents: 0, catalogSalts: 0, catalogClients: 0, emailChanges: 0 });
+  expect(await run()).toEqual({ shares: 0, deviceCodes: 0, signInChallenges: 0, emailTokens: 0, webauthnChallenges: 0, bugReports: 0, bugReportsIndexed: expect.any(Number), adminEvents: 0, catalogSalts: 0, catalogClients: 0, emailChanges: 0, githubStates: 0 });
 });
 
 test('the Shares page API: change a share, delete the expired ones, delete them all', async ({ playwright, baseURL }) => {

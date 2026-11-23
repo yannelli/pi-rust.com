@@ -7,8 +7,8 @@
 // 2. POST /api/account/email/confirm with the link's token makes the change. The new address counts as
 //    verified, links sent to the old address stop working, and the old address gets an undo link (7 days).
 // 3. POST /api/account/email/undo with that token puts the old address back, signs out everywhere, replaces
-//    the password with an unknown one, removes passkeys and two-step verification added since the change was
-//    asked for, and sends a link to set a new password. So someone who took over an account and moved it to
+//    the password with an unknown one, removes passkeys, a GitHub connection, and two-step verification added
+//    since the change was asked for, and sends a link to set a new password. So someone who took over an account and moved it to
 //    their own address cannot keep it.
 //
 // See docs/accounts.md.
@@ -156,7 +156,8 @@ export async function undoChange(c: Context, body: Json): Promise<Response> {
         'UPDATE users SET totp_secret = NULL, totp_pending = NULL, totp_enabled_at = NULL, totp_last_step = NULL WHERE id = ? AND totp_enabled_at >= ?',
       ).bind(user.id, row.requested_at),
       c.env.DB.prepare('DELETE FROM passkeys WHERE user_id = ? AND created_at >= ?').bind(user.id, row.requested_at),
-      ...['sessions', 'cli_tokens', 'sign_in_challenges', 'webauthn_challenges', 'device_codes', 'email_tokens', 'email_changes'].map((table) =>
+      c.env.DB.prepare('DELETE FROM github_accounts WHERE user_id = ? AND created_at >= ?').bind(user.id, row.requested_at),
+      ...['sessions', 'cli_tokens', 'sign_in_challenges', 'webauthn_challenges', 'github_states', 'device_codes', 'email_tokens', 'email_changes'].map((table) =>
         c.env.DB.prepare(`DELETE FROM ${table} WHERE user_id = ?`).bind(user.id),
       ),
     ]);

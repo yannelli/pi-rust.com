@@ -56,6 +56,9 @@ export interface AccountEnv {
   AUTH_PEPPER?: string;
   /** Secret: base64 of 32 bytes, the AES-GCM key for TOTP secrets at rest. */
   TOTP_ENCRYPTION_KEY?: string;
+  /** Secrets: the client ID and client secret of the GitHub app for sign-in with GitHub. */
+  GITHUB_CLIENT_ID?: string;
+  GITHUB_CLIENT_SECRET?: string;
   /** "1" stores email in D1 for tests, and only on localhost. Never set in wrangler.jsonc. */
   DEV_MAILBOX?: string;
 }

@@ -1,12 +1,14 @@
 // Routes for /api/account/*, /oauth/*, and the account pages. Every state-changing account API request
-// must be JSON from the site origin (see checkSameOrigin).
+// must be JSON from the site origin (see checkSameOrigin). GET /api/account/github/callback is the one
+// navigation: GitHub sends the browser there, and it answers with a redirect.
 
 import * as auth from './auth';
 import { context, withCookies, type Context } from './context';
 import { approveDevice, denyDevice, deviceAuthorization, deviceLookup, deviceToken } from './device';
 import * as emailChange from './email-change';
 import type { AccountEnv, ExecutionContext } from './env';
-import { checkSameOrigin, fail, HttpError, PAGE_HEADERS, readJson, type Json } from './http';
+import * as github from './github';
+import { checkSameOrigin, fail, HttpError, PAGE_HEADERS, readJson, redirect, safeNext, type Json } from './http';
 import * as security from './security';
 import { loadSession } from './sessions';
 import { deleteAllSharesOfAccount, deleteExpiredSharesOfAccount, updateShareOfAccount } from '../share/account';
@@ -28,6 +30,7 @@ const ROUTES: [method: string, path: RegExp, handler: Handler][] = [
   ['POST', /^verify$/, (c, body) => auth.verifyEmail(c, body)],
   ['POST', /^verify\/resend$/, (c) => auth.resendVerification(c)],
   ['POST', /^reset\/request$/, (c, body) => auth.requestReset(c, body)],
+  ['POST', /^reset\/check$/, (c, body) => auth.checkReset(c, body)],
   ['POST', /^reset$/, (c, body) => auth.resetPassword(c, body)],
   ['POST', /^email\/change$/, (c, body) => emailChange.requestChange(c, body)],
   ['POST', /^email\/change\/cancel$/, (c) => emailChange.cancelChange(c)],
@@ -36,6 +39,13 @@ const ROUTES: [method: string, path: RegExp, handler: Handler][] = [
   ['POST', /^reauth$/, (c, body) => auth.reauthPassword(c, body)],
   ['POST', /^reauth\/passkey\/options$/, (c) => auth.reauthPasskeyOptions(c)],
   ['POST', /^reauth\/passkey$/, (c, body) => auth.reauthPasskey(c, body)],
+  ['POST', /^github\/start$/, (c, body) => github.start(c, body)],
+  ['GET', /^github\/callback$/, (c) => github.callback(c)],
+  ['GET', /^github\/sign-up$/, (c) => github.pendingDetails(c, 'sign-up')],
+  ['POST', /^github\/sign-up$/, (c, body) => github.signUp(c, body)],
+  ['GET', /^github\/link$/, (c) => github.pendingDetails(c, 'link')],
+  ['POST', /^github\/link$/, (c) => github.link(c)],
+  ['DELETE', /^github$/, (c) => github.disconnect(c)],
   ['POST', /^password$/, (c, body) => security.changePassword(c, body)],
   ['POST', /^totp\/setup$/, (c) => security.totpSetup(c)],
   ['POST', /^totp\/enable$/, (c, body) => security.totpEnable(c, body)],
@@ -112,17 +122,6 @@ interface Fetcher {
 const SIGNED_IN_PAGES = new Set(['/account/', '/account/security/', '/account/settings/', '/device/']);
 /** Pages a signed-in user skips. */
 const SIGNED_OUT_PAGES = new Set(['/account/sign-in/', '/account/sign-up/']);
-
-/** Where to go after sign-in: an account, admin, or device page or a share (/s/<id>) on this site, else the account home. */
-export function safeNext(value: string | null): string {
-  if (!value || value.startsWith('//') || /[\\\s]/.test(value)) return '/account/';
-  if (/^\/(account|admin|device)(\/|\?|$)/.test(value) || /^\/s\/[A-Za-z0-9_-]{22}$/.test(value)) return value;
-  return '/account/';
-}
-
-function redirect(location: string): Response {
-  return new Response(null, { status: 302, headers: { Location: location, 'Cache-Control': 'no-store' } });
-}
 
 /**
  * The site's 404 page, for an admin page asked for by anyone but an admin. A path with no asset gets it

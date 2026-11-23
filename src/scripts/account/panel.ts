@@ -1,11 +1,12 @@
 /**
  * Shared by the signed-in pages: the account summary, sign out, confirm-it's-you (re-authentication),
- * and confirm dialogs.
+ * confirm dialogs, and the result of a trip to GitHub (?github= or ?github_error=).
  */
 
 import { api, ApiError, loadMe, type Me } from './api';
+import { githubErrorMessage, goToGitHub, takeParam } from './github';
 import { passkeysSupported, usePasskey } from './passkey';
-import { $, busy, clearErrors, input, setFieldError, toast } from './ui';
+import { $, busy, clearErrors, input, setFieldError, showError, toast } from './ui';
 
 let me: Promise<Me> | undefined;
 
@@ -29,36 +30,66 @@ $('[data-sign-out]').addEventListener('click', async (event) => {
   }
 });
 
+const GITHUB_RESULTS: Record<string, string> = { connected: 'GitHub connected', confirmed: 'Confirmed. Try again to continue.' };
+const githubResult = takeParam('github');
+const githubError = takeParam('github_error');
+if (githubResult && GITHUB_RESULTS[githubResult]) toast(GITHUB_RESULTS[githubResult]);
+if (githubError) toast(githubErrorMessage(githubError));
+
 const reauthDialog = $('[data-reauth]') as HTMLDialogElement;
 const reauthForm = $('[data-reauth-form]') as HTMLFormElement;
 const reauthPasskey = $('[data-reauth-passkey]') as HTMLButtonElement;
+const reauthGitHub = $('[data-reauth-github]') as HTMLButtonElement;
+const reauthSubmit = $('[data-reauth-submit]') as HTMLButtonElement;
 
-/** Opens "Confirm it's you". Resolves true once the password or a passkey is confirmed. */
-function confirmIdentity(): Promise<boolean> {
-  return new Promise((resolve) => {
+/**
+ * Opens "Confirm it's you". Resolves true once the password or a passkey is confirmed. GitHub leaves the
+ * page and comes back to it with ?github=confirmed. An account made with GitHub has no password until its
+ * owner sets one, so its main button is "Use GitHub".
+ */
+async function confirmIdentity(): Promise<boolean> {
+  const { account: info } = await account();
+  return new Promise<boolean>((resolve) => {
     clearErrors(reauthForm);
     reauthForm.reset();
-    account().then(({ account }) => (reauthPasskey.hidden = account.passkeys === 0 || !passkeysSupported()));
+    const withPassword = info.password;
+    const password = input(reauthForm, 'password');
+    $('[data-reauth-password]').hidden = !withPassword;
+    reauthPasskey.hidden = info.passkeys === 0 || !passkeysSupported();
+    reauthGitHub.hidden = !withPassword || !info.github;
+    reauthSubmit.hidden = !withPassword && !info.github;
+    reauthSubmit.textContent = withPassword ? 'Confirm' : 'Use GitHub';
+    $('[data-reauth-text]').textContent = withPassword ? 'Enter your password to continue.' : info.github ? 'Use GitHub to continue.' : 'Use a passkey to continue.';
     let settled = false;
     const finish = (value: boolean) => {
       if (settled) return;
       settled = true;
       reauthForm.removeEventListener('submit', onSubmit);
       reauthPasskey.removeEventListener('click', onPasskey);
+      reauthGitHub.removeEventListener('click', onGitHub);
       reauthDialog.removeEventListener('close', onClose);
       if (reauthDialog.open) reauthDialog.close();
       resolve(value);
     };
+    const fail = (error: unknown) => (withPassword ? setFieldError(password, (error as Error).message) : showError(reauthForm, error));
+    const onGitHub = async () => {
+      clearErrors(reauthForm);
+      try {
+        await busy(withPassword ? reauthGitHub : reauthSubmit, () => goToGitHub('reauth', location.pathname + location.search));
+      } catch (error) {
+        fail(error);
+      }
+    };
     const onSubmit = async (event: SubmitEvent) => {
       event.preventDefault();
+      if (!withPassword) return onGitHub();
       clearErrors(reauthForm);
-      const password = input(reauthForm, 'password');
       if (!password.value) return setFieldError(password, 'Enter your password.');
       try {
-        await busy(reauthForm.querySelector('button[type=submit]'), () => api('reauth', { body: { password: password.value } }));
+        await busy(reauthSubmit, () => api('reauth', { body: { password: password.value } }));
         finish(true);
       } catch (error) {
-        setFieldError(password, (error as Error).message);
+        fail(error);
       }
     };
     const onPasskey = async () => {
@@ -67,16 +98,17 @@ function confirmIdentity(): Promise<boolean> {
         await busy(reauthPasskey, () => usePasskey('reauth/passkey/options', 'reauth/passkey'));
         finish(true);
       } catch (error) {
-        setFieldError(input(reauthForm, 'password'), (error as Error).message);
+        fail(error);
       }
     };
     const onClose = () => finish(false);
     reauthForm.addEventListener('submit', onSubmit);
     reauthPasskey.addEventListener('click', onPasskey);
+    reauthGitHub.addEventListener('click', onGitHub);
     reauthDialog.addEventListener('close', onClose);
     $('[data-reauth-cancel]').onclick = () => finish(false);
     reauthDialog.showModal();
-    input(reauthForm, 'password').focus();
+    (withPassword ? password : reauthSubmit.hidden ? reauthPasskey : reauthSubmit).focus();
   });
 }
 

@@ -7,6 +7,7 @@
   - [With the Worker](#with-the-worker)
 - [Local Accounts](#local-accounts)
   - [The Dev Mailbox](#the-dev-mailbox)
+  - [The Fake GitHub](#the-fake-github)
   - [Test Routes](#test-routes)
 - [Testing](#testing)
 - [Commands](#commands)
@@ -61,6 +62,12 @@ You may put the three variables in a `.dev.vars` file instead, which git ignores
 
 With `DEV_MAILBOX=1`, a request to `localhost` or `127.0.0.1` does not send email. The Worker writes each message to the `dev_mailbox` table instead, so you can sign up and follow verification and reset links locally. `DEV_MAILBOX` must never be set in `wrangler.jsonc`.
 
+### The Fake GitHub
+
+With the dev mailbox on and no `GITHUB_CLIENT_ID` or `GITHUB_CLIENT_SECRET`, "Sign in with GitHub" goes to a fake GitHub on `/__dev/github/authorize`. Its form asks for the GitHub user ID, username, and primary email to sign in as, and whether that email is verified. The Worker checks the PKCE verifier as GitHub does, and never calls GitHub.
+
+To try the real GitHub locally, put the client ID and secret of a GitHub app whose callback URL is `http://localhost:<port>/api/account/github/callback` in `.dev.vars`.
+
 ### Test Routes
 
 With the dev mailbox on, the Worker also answers these routes (`worker/accounts/dev.ts`). Everywhere else they are `404`.
@@ -70,6 +77,8 @@ With the dev mailbox on, the Worker also answers these routes (`worker/accounts/
 | `GET /__dev/mailbox?to=<email>` | Lists the messages for one address, newest first |
 | `POST /__dev/state` | Moves a row to a state a test cannot wait for (see below) |
 | `POST /__dev/cleanup` | Runs the hourly cleanup, optionally as of `{"now": <Unix ms>}`, and returns what it deleted |
+| `GET /__dev/github/authorize` | The [fake GitHub](#the-fake-github)'s sign-in form |
+| `GET /__dev/github/approve` | Sends the browser back to the callback as the account in the query (`id`, `login`, `email`, `verified=on`), or with `error=access_denied` when `cancel` is set |
 
 `/__dev/state` takes one of these actions:
 

@@ -48,6 +48,9 @@ export interface Account {
   email: string;
   verified: boolean;
   createdAt: string;
+  /** False for an account made with GitHub until its owner sets a password. */
+  password: boolean;
+  github: { login: string; connectedAt: string; lastUsedAt: string | null } | null;
   totp: boolean;
   passkeys: number;
   recoveryCodes: number;

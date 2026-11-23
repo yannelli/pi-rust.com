@@ -1,5 +1,6 @@
 ---
 import Auth from '../../layouts/Auth.astro';
+import GitHubButton from '../../components/account/GitHubButton.astro';
 ---
 
 <Auth title="Sign in" description="Sign in to your pi-rust account to manage shared sessions and the pi CLI.">
@@ -18,11 +19,12 @@ import Auth from '../../layouts/Auth.astro';
         <button class="btn btn--primary" type="submit">Next</button>
       </div>
     </form>
-    <div data-passkey-entry>
-      <p class="divider">or</p>
+    <p class="divider">or</p>
+    <div class="other-ways">
+      <GitHubButton label="Sign in with GitHub" />
       <button class="btn btn--secondary btn--block" type="button" data-passkey-sign-in>Sign in with a passkey</button>
-      <p class="notice notice--error" role="alert" data-passkey-error hidden></p>
     </div>
+    <p class="notice notice--error" role="alert" data-other-error hidden></p>
   </section>
 
   <section data-step="password" hidden>

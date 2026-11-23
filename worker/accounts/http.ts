@@ -121,7 +121,7 @@ export function clientIp(request: Request): string {
 }
 
 /** Route classes share the AUTH_LIMITER namespace: 10 requests per 60 seconds per client IP and class. */
-export type LimitClass = 'sign-in' | 'sign-up' | 'reset' | 'verify' | 'two-step' | 'passkey' | 'reauth' | 'device' | 'email';
+export type LimitClass = 'sign-in' | 'sign-up' | 'reset' | 'verify' | 'two-step' | 'passkey' | 'reauth' | 'device' | 'email' | 'github';
 
 export async function limit(limiter: RateLimit, key: string): Promise<void> {
   const { success } = await limiter.limit({ key });
@@ -130,6 +130,17 @@ export async function limit(limiter: RateLimit, key: string): Promise<void> {
 
 export function limitAuth(limiter: RateLimit, request: Request, kind: LimitClass): Promise<void> {
   return limit(limiter, `${kind}:${clientIp(request)}`);
+}
+
+export function redirect(location: string): Response {
+  return new Response(null, { status: 302, headers: { Location: location, 'Cache-Control': 'no-store' } });
+}
+
+/** Where to go after sign-in: an account, admin, or device page or a share (/s/<id>) on this site, else the account home. */
+export function safeNext(value: string | null): string {
+  if (!value || value.startsWith('//') || /[\\\s]/.test(value)) return '/account/';
+  if (/^\/(account|admin|device)(\/|\?|$)/.test(value) || /^\/s\/[A-Za-z0-9_-]{22}$/.test(value)) return value;
+  return '/account/';
 }
 
 export function readCookie(request: Request, name: string): string | undefined {

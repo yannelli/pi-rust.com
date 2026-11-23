@@ -44,7 +44,7 @@ Then turn on two-step verification or add a passkey at `/account/security/`, and
 | Page | What it shows |
 | --- | --- |
 | `/admin/` | Totals for accounts, shares, open bug reports, and installs; pi-rust users per day and their versions and platforms; new accounts and shares per day; and install stats |
-| `/admin/people/` | Every account, newest first, with search by address and filters for admins, suspended, and unverified accounts |
+| `/admin/people/` | Every account, newest first, with its connected GitHub username, search by address or GitHub username, and filters for admins, suspended, and unverified accounts |
 | `/admin/shares/` | Every share and its owner, with search by title, owner, or share ID, and filters by visibility and expiry |
 | `/admin/bug-reports/` | `/bug` reports, newest first, with search and an open or closed filter. A report opens with its description, environment, files, and JSON parts (up to 512 KB each). `/admin/bug-reports/#<id>` opens one report; each report email links there |
 | `/admin/activity/` | What admins did, newest first |

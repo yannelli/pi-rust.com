@@ -3,8 +3,9 @@
 
 import type { Context, User } from './context';
 import { hmacHex, randomId, randomToken, sha256 } from './crypto';
-import { HttpError } from './http';
+import { HttpError, type Json } from './http';
 import { newRecoveryCode, normalizeRecoveryCode, RECOVERY_CODE_COUNT } from './totp';
+import { TERMS_VERSION } from '../../src/lib/legal';
 
 export function pepper(c: Context): string {
   if (!c.env.AUTH_PEPPER) {
@@ -37,6 +38,17 @@ export function passwordProblem(password: string, email: string): string | undef
 export function checkNewPassword(password: string, email: string): void {
   const problem = passwordProblem(password, email);
   if (problem) throw new HttpError(400, 'invalid_password', problem, { field: 'password' });
+}
+
+/** Sign-up needs the Terms box, checked on a page built with the current Terms. */
+export function requireTerms(body: Json): void {
+  if (body.acceptTerms !== true) {
+    throw new HttpError(400, 'terms_required', 'Confirm that you are 18 or older and agree to the Terms of Service.', { field: 'acceptTerms' });
+  }
+  // The version on the page the user agreed to, so a form opened before a Terms change cannot record the new version.
+  if (body.termsVersion !== TERMS_VERSION) {
+    throw new HttpError(409, 'terms_changed', 'The Terms of Service changed. Reload this page and review them before you create your account.', { field: 'acceptTerms' });
+  }
 }
 
 export function requireVerified(user: User): void {
