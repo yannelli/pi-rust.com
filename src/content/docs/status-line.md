@@ -4,7 +4,7 @@ description: "The custom status line is the marketplace:statusline extension. Ea
 group: "Use pi"
 order: 14
 source: "crates/pi-coding-agent/docs/status-line.md"
-ref: "v0.12.32"
+ref: "v0.12.33"
 lead: false
 ---
 

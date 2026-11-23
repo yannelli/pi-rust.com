@@ -3,6 +3,14 @@ title: "Changelog"
 source: "CHANGELOG.md"
 ---
 
+## 0.12.33
+
+Released November 23, 2026.
+
+### Fixed
+
+- **shell:** run shell commands in a new session without pi's terminal ([6546c4c](https://github.com/yannelli/pi-rust/commit/6546c4cb4ba064d915d17c48f06efa8d72c8fd08))
+
 ## 0.12.32
 
 Released November 23, 2026.

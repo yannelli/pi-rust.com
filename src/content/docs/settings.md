@@ -4,7 +4,7 @@ description: "Settings load from <agent dir>/settings.json (normally ~/.pi/agent
 group: "Use pi"
 order: 12
 source: "crates/pi-coding-agent/docs/settings.md"
-ref: "v0.12.32"
+ref: "v0.12.33"
 lead: false
 ---
 
@@ -50,7 +50,7 @@ Native extensions can read the same key with `host.settings::<String>("listOverf
 
 | Value | `User-Agent` | Attribution |
 | --- | --- | --- |
-| `"pi"` (default) | `pi/<upstream version> (<platform>; rust; <arch>)`. The version is the upstream pi release that pi-rust has parity with (`syncedVersion` in [`docs/parity/upstream.json`](https://github.com/yannelli/pi-rust/blob/v0.12.32/docs/parity/upstream.json)). | pi, `https://pi.dev` |
+| `"pi"` (default) | `pi/<upstream version> (<platform>; rust; <arch>)`. The version is the upstream pi release that pi-rust has parity with (`syncedVersion` in [`docs/parity/upstream.json`](https://github.com/yannelli/pi-rust/blob/v0.12.33/docs/parity/upstream.json)). | pi, `https://pi.dev` |
 | `"pi-rust"` | `pi-rust/<pi-rust version> (<platform>; rust; <arch>)` | pi-rust, `https://pi-rust.com` |
 
 Attribution headers, such as OpenRouter's `HTTP-Referer` and `X-OpenRouter-Title`, are sent only while install telemetry is on (`enableInstallTelemetry` or `PI_TELEMETRY=1`). Requests that pi-rust makes to its own services, such as the version check, always send the pi-rust version.

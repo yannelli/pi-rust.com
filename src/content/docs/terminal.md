@@ -4,7 +4,7 @@ description: "To select a harness theme, open /settings and select Theme. In int
 group: "Use pi"
 order: 13
 source: "crates/pi-coding-agent/docs/terminal.md"
-ref: "v0.12.32"
+ref: "v0.12.33"
 lead: false
 ---
 
