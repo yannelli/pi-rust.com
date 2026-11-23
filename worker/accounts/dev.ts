@@ -4,11 +4,87 @@
 //                                    code, share, or email link, an old re-authentication, an unverified
 //                                    address, an admin, a bug report without its row)
 //   POST /__dev/cleanup              runs the hourly cleanup now, optionally as of {"now": <ms>}
+//   GET  /__dev/github/authorize     the fake GitHub's sign-in page, used when no GitHub app is set: a form
+//                                    for the GitHub account to sign in as, which posts to
+//   GET  /__dev/github/approve       which sends the browser back to the callback with a code
 // Everywhere else they answer 404.
 
 import { cleanup, type CleanupEnv } from '../cleanup';
+import { base64url, fromBase64url, pkceChallenge } from './crypto';
 import { devMailboxOn } from './email';
+import type { GitHubClient } from './github';
 import { json, type Json } from './http';
+
+interface FakeGitHubAccount {
+  id: number;
+  login: string;
+  email: string;
+  verified: boolean;
+  /** The PKCE code challenge of the authorization request. */
+  challenge: string;
+}
+
+const fakeCode = (account: FakeGitHubAccount) => base64url(new TextEncoder().encode(JSON.stringify(account)));
+
+function fakeAccount(code: string): FakeGitHubAccount {
+  try {
+    return JSON.parse(new TextDecoder().decode(fromBase64url(code))) as FakeGitHubAccount;
+  } catch {
+    throw new Error('Not a fake GitHub code');
+  }
+}
+
+/** The fake GitHub: its code and access token are the account chosen on /__dev/github/authorize. */
+export function fakeGitHub(origin: string): GitHubClient {
+  return {
+    authorizeUrl: ({ redirectUri, state, codeChallenge }) =>
+      `${origin}/__dev/github/authorize?${new URLSearchParams({ redirect_uri: redirectUri, state, code_challenge: codeChallenge })}`,
+    async accessToken(code, codeVerifier) {
+      if (fakeAccount(code).challenge !== (await pkceChallenge(codeVerifier))) throw new Error('The PKCE code verifier does not match');
+      return code;
+    },
+    async user(token) {
+      const { id, login } = fakeAccount(token);
+      return { id, login };
+    },
+    async verifiedEmail(token) {
+      const { email, verified } = fakeAccount(token);
+      return verified && email ? email : null;
+    },
+  };
+}
+
+const attribute = (value: string) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+function fakeGitHubPage(url: URL): Response {
+  const hidden = ['redirect_uri', 'state', 'code_challenge']
+    .map((name) => `<input type="hidden" name="${name}" value="${attribute(url.searchParams.get(name) ?? '')}">`)
+    .join('');
+  const html = `<!doctype html><meta charset="utf-8"><title>Fake GitHub</title>
+<h1>Sign in to pi-rust.com with GitHub</h1>
+<form action="/__dev/github/approve">${hidden}
+<p><label>GitHub user ID <input name="id" inputmode="numeric" required></label></p>
+<p><label>Username <input name="login" required></label></p>
+<p><label>Primary email <input name="email" type="email"></label></p>
+<p><label><input type="checkbox" name="verified" checked> Email verified</label></p>
+<p><button>Authorize</button> <button name="cancel" value="1" formnovalidate>Cancel</button></p>
+</form>`;
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+}
+
+function fakeGitHubApprove(url: URL): Response {
+  const params = url.searchParams;
+  const back = new URL(params.get('redirect_uri') ?? '', url.origin);
+  if (back.origin !== url.origin || back.pathname !== '/api/account/github/callback') return json(400, { ok: false, error: 'bad_redirect_uri' });
+  back.searchParams.set('state', params.get('state') ?? '');
+  if (params.has('cancel')) {
+    back.searchParams.set('error', 'access_denied');
+  } else {
+    const account = { id: Number(params.get('id')), login: params.get('login') ?? '', email: params.get('email') ?? '', verified: params.get('verified') === 'on' };
+    back.searchParams.set('code', fakeCode({ ...account, challenge: params.get('code_challenge') ?? '' }));
+  }
+  return new Response(null, { status: 302, headers: { Location: back.toString() } });
+}
 
 export async function handleDev(request: Request, env: CleanupEnv): Promise<Response | undefined> {
   if (!devMailboxOn(env, request)) return undefined;
@@ -46,6 +122,8 @@ export async function handleDev(request: Request, env: CleanupEnv): Promise<Resp
     await run();
     return json(200, { ok: true });
   }
+  if (url.pathname === '/__dev/github/authorize' && request.method === 'GET') return fakeGitHubPage(url);
+  if (url.pathname === '/__dev/github/approve' && request.method === 'GET') return fakeGitHubApprove(url);
   if (url.pathname === '/__dev/cleanup' && request.method === 'POST') {
     const body = (await request.json().catch(() => ({}))) as { now?: number };
     return json(200, { ok: true, deleted: await cleanup(env, typeof body.now === 'number' ? body.now : undefined) });

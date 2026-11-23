@@ -4,11 +4,14 @@ export type EmailMessage =
   | { kind: 'verify'; link: string }
   | { kind: 'sign-up-existing'; signInLink: string; resetLink: string }
   | { kind: 'reset'; link: string }
-  | { kind: 'password-changed'; resetLink: string }
+  /** `github`: the username of a GitHub account that can still sign in, after a reset. */
+  | { kind: 'password-changed'; resetLink: string; github?: string }
   | { kind: 'two-step-on'; resetLink: string }
   | { kind: 'two-step-off'; resetLink: string }
   | { kind: 'passkey-added'; name: string; resetLink: string }
   | { kind: 'passkey-removed'; name: string; resetLink: string }
+  | { kind: 'github-connected'; login: string; resetLink: string }
+  | { kind: 'github-disconnected'; login: string; resetLink: string }
   | { kind: 'recovery-code-used'; left: number; resetLink: string }
   | { kind: 'account-deleted' }
   | { kind: 'email-change'; link: string }
@@ -71,7 +74,13 @@ function content(message: EmailMessage): { subject: string; heading: string; blo
       return {
         subject: 'Your pi-rust password was changed',
         heading: 'Password changed',
-        blocks: ['The password for your pi-rust account was changed.', ...notYou(message.resetLink)],
+        blocks: [
+          'The password for your pi-rust account was changed.',
+          ...(message.github
+            ? [`The GitHub account ${message.github} can still sign in to your account. If you did not connect it, sign in and disconnect it on the Security page.`]
+            : []),
+          ...notYou(message.resetLink),
+        ],
       };
     case 'two-step-on':
       return {
@@ -96,6 +105,18 @@ function content(message: EmailMessage): { subject: string; heading: string; blo
         subject: 'A passkey was removed from your pi-rust account',
         heading: 'Passkey removed',
         blocks: [`The passkey “${message.name}” was removed from your pi-rust account.`, ...notYou(message.resetLink)],
+      };
+    case 'github-connected':
+      return {
+        subject: 'GitHub was connected to your pi-rust account',
+        heading: 'GitHub connected',
+        blocks: [`The GitHub account ${message.login} can now sign in to your pi-rust account.`, ...notYou(message.resetLink)],
+      };
+    case 'github-disconnected':
+      return {
+        subject: 'GitHub was disconnected from your pi-rust account',
+        heading: 'GitHub disconnected',
+        blocks: [`The GitHub account ${message.login} can no longer sign in to your pi-rust account.`, ...notYou(message.resetLink)],
       };
     case 'recovery-code-used':
       return {
@@ -147,7 +168,7 @@ function content(message: EmailMessage): { subject: string; heading: string; blo
         heading: 'Email changed',
         blocks: [
           `The email of your pi-rust account was changed to ${message.newEmail}. You sign in with that address now.`,
-          'If you did not do this, undo it. Undoing puts this address back, signs out everywhere, removes the passkeys and two-step verification added since the change was asked for, and sends you a link to set a new password.',
+          'If you did not do this, undo it. Undoing puts this address back, signs out everywhere, removes the passkeys, GitHub connection, and two-step verification added since the change was asked for, and sends you a link to set a new password.',
           { label: 'Undo the change', href: message.undoLink },
           'The link works for 7 days.',
         ],

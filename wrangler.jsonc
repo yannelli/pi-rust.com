@@ -73,7 +73,8 @@
   ],
   // Hourly at :17: deletes expired shares and expired sign-in rows (worker/cleanup.ts).
   "triggers": { "crons": ["17 * * * *"] },
-  // Secrets, set with `wrangler secret put`: BUG_REPORT_TO, AUTH_PEPPER, TOTP_ENCRYPTION_KEY, and the optional
+  // Secrets, set with `wrangler secret put`: BUG_REPORT_TO, AUTH_PEPPER, TOTP_ENCRYPTION_KEY, GITHUB_CLIENT_ID and
+  // GITHUB_CLIENT_SECRET (the GitHub app for sign-in with GitHub; docs/deployment.md), and the optional
   // CLOUDFLARE_ANALYTICS_TOKEN (Account Analytics Read, and Analytics Read on the pi-rust.com zone) that shows
   // install stats and the versions in use in the admin area.
   "vars": {

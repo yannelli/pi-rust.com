@@ -16,6 +16,7 @@ import { cancelPendingStatement, pendingEmail } from './email-change';
 import type { AccountEnv } from './env';
 import { decryptSecret, encryptSecret, hashPassword } from './crypto';
 import { sendEmail } from './email';
+import { connectedGitHub, githubSummary } from './github';
 import { clearCookie, HttpError, limitAuth, ok, str, type Json } from './http';
 import { defaultPasskeyName, passkeysOf, register, registrationOptions } from './passkeys';
 import { REAUTH_WINDOW, requireRecentAuth, requireSession, rotateSession, SESSION_COOKIE } from './sessions';
@@ -30,6 +31,8 @@ export async function me(c: Context): Promise<Response> {
       email: user.email,
       verified: Boolean(user.email_verified_at),
       createdAt: isoTime(user.created_at),
+      password: Boolean(user.password_hash),
+      github: await githubSummary(c, user.id),
       totp: Boolean(user.totp_enabled_at),
       passkeys: await passkeyCount(c, user.id),
       recoveryCodes: await recoveryCodesLeft(c, user.id),
@@ -173,6 +176,9 @@ export async function renamePasskey(c: Context, id: string, body: Json): Promise
 export async function removePasskey(c: Context, id: string): Promise<Response> {
   const { session, user } = await requireSession(c);
   requireRecentAuth(session);
+  if (!user.password_hash && !(await connectedGitHub(c, user.id)) && (await passkeyCount(c, user.id)) <= 1) {
+    throw new HttpError(409, 'last_sign_in_method', 'Set a password before you remove your last passkey.');
+  }
   const row = await c.env.DB.prepare('DELETE FROM passkeys WHERE id = ? AND user_id = ? RETURNING name').bind(id, user.id).first<{ name: string }>();
   if (!row) throw new HttpError(404, 'not_found', 'No such passkey.');
   await dropRecoveryCodesIfUnused(c, user.id);
@@ -254,7 +260,7 @@ export async function deleteUserData(env: AccountEnv, userId: string): Promise<v
     results.map((row) => row.id),
   );
   await env.DB.batch(
-    ['sessions', 'sign_in_challenges', 'email_tokens', 'email_changes', 'recovery_codes', 'passkeys', 'webauthn_challenges', 'cli_tokens', 'device_codes', 'shares']
+    ['sessions', 'sign_in_challenges', 'email_tokens', 'email_changes', 'recovery_codes', 'passkeys', 'webauthn_challenges', 'github_accounts', 'github_states', 'cli_tokens', 'device_codes', 'shares']
       .map((table) => env.DB.prepare(`DELETE FROM ${table} WHERE user_id = ?`).bind(userId))
       .concat(env.DB.prepare('DELETE FROM users WHERE id = ?').bind(userId)),
   );

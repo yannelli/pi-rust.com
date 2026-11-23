@@ -7,6 +7,8 @@ import {
   cliClient,
   cliToken,
   devState,
+  githubAccount,
+  githubTrip,
   linkIn,
   mailbox,
   pageIp,
@@ -70,6 +72,7 @@ test('undo from the old address takes the account back from whoever moved it', a
   // Added after the change was asked for, as by someone who took over the account.
   const { secret } = await (await client.post('/api/account/totp/setup', { data: {} })).json();
   expect((await client.post('/api/account/totp/enable', { data: { code: totp(secret) } })).status()).toBe(200);
+  expect(await githubTrip(client, 'connect', githubAccount('taker'))).toBe('/account/security/?github=connected');
   const token = await cliToken(playwright, baseURL!, client);
   const link = linkIn(await waitForMail(client, next, /^Confirm your new email/), /\/account\/confirm-email\//);
   expect((await client.post('/api/account/email/confirm', { data: { token: tokenOf(link) } })).status()).toBe(200);
@@ -87,9 +90,9 @@ test('undo from the old address takes the account back from whoever moved it', a
   const reset = linkIn(await waitForMail(owner, email, /^The change of your pi-rust email was undone$/), /\/account\/new-password\//);
   const password = 'a brand new password 42';
   expect((await owner.post('/api/account/reset', { data: { token: tokenOf(reset), password } })).status()).toBe(200);
-  // The two-step verification turned on since the request is gone, so a password signs in.
+  // The two-step verification and GitHub added since the request are gone, so a password signs in.
   expect(await (await owner.post('/api/account/sign-in', { data: { email, password } })).json()).toEqual({ ok: true, next: 'done' });
-  expect((await (await owner.get('/api/account/me')).json()).account).toMatchObject({ email, totp: false, pendingEmail: null });
+  expect((await (await owner.get('/api/account/me')).json()).account).toMatchObject({ email, totp: false, github: null, pendingEmail: null });
   expect((await owner.post('/api/account/email/undo', { data: { token: tokenOf(undoLink) } })).status()).toBe(400);
 });
 

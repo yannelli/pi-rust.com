@@ -7,6 +7,7 @@
 - [Migrations](#migrations)
 - [Cloudflare Resources](#cloudflare-resources)
 - [Secrets](#secrets)
+  - [The GitHub App](#the-github-app)
 - [Setting Up a New Account](#setting-up-a-new-account)
 
 ## Introduction
@@ -73,11 +74,30 @@ Set each secret with `npx wrangler secret put <NAME>`. None of them belong in th
 | `TOTP_ENCRYPTION_KEY` | Base64 of 32 random bytes. Encrypts two-step verification secrets |
 | `BUG_REPORT_TO` | The address that receives bug reports. It must be a verified Email Routing destination |
 | `CLOUDFLARE_ANALYTICS_TOKEN` | Optional. An API token for the admin area's analytics; see [Admin Area](admin.md#analytics-token) |
+| `GITHUB_CLIENT_ID` | The client ID of the GitHub app for sign-in with GitHub; see [The GitHub App](#the-github-app) |
+| `GITHUB_CLIENT_SECRET` | A client secret of that app |
 
 > [!WARNING]
 > Never change `AUTH_PEPPER` or `TOTP_ENCRYPTION_KEY` on a live site. A new pepper breaks every password and recovery code, and a new key breaks every two-step verification secret.
 
-Without `AUTH_PEPPER`, the account API answers `503 not_configured`. Without `TOTP_ENCRYPTION_KEY`, so does two-step verification. Without `BUG_REPORT_TO`, bug reports are stored but not emailed.
+Without `AUTH_PEPPER`, the account API answers `503 not_configured`. Without `TOTP_ENCRYPTION_KEY`, so does two-step verification, and without the two GitHub secrets, so does sign-in with GitHub. Without `BUG_REPORT_TO`, bug reports are stored but not emailed.
+
+### The GitHub App
+
+[Sign-in with GitHub](accounts.md#github) uses the GitHub app `pi-rust-com`. It can be an OAuth app or a GitHub App:
+
+| Setting | Value |
+| --- | --- |
+| Callback URL | `https://pi-rust.com/api/account/github/callback` |
+| GitHub App permissions | Account permissions, Email addresses: Read-only. Nothing else |
+| OAuth app scope | None to set: the Worker asks for `user:email` |
+
+Generate a client secret on the app's settings page, then:
+
+```sh
+npx wrangler secret put GITHUB_CLIENT_ID
+npx wrangler secret put GITHUB_CLIENT_SECRET
+```
 
 ## Setting Up a New Account
 
@@ -99,4 +119,4 @@ Then, in the Cloudflare dashboard:
 1. Turn on Email Routing for the zone, and verify the `BUG_REPORT_TO` address as a destination.
 2. Onboard the zone to Email Sending (Email, then Email Sending). It adds the return path, DKIM, and DMARC records. Without it, account email reaches only verified Email Routing addresses, and other sends fail with `E_RECIPIENT_NOT_ALLOWED`.
 
-The first write creates the Analytics Engine dataset. To make the first admin, see [Admin Area](admin.md#making-the-first-admin).
+The first write creates the Analytics Engine dataset. To make the first admin, see [Admin Area](admin.md#making-the-first-admin). For sign-in with GitHub, register a GitHub app as [The GitHub App](#the-github-app) describes.

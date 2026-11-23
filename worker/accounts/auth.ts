@@ -1,16 +1,32 @@
 // Sign-up, sign-in (password, second step, passkey), sign-out, email verification, password reset,
 // and re-authentication.
 
-import { pepper, totpKey, checkNewPassword, emailLink, findEmailToken, useEmailToken, resetLink, useRecoveryCode, recoveryCodesLeft, passkeyCount } from './common';
-import { userByEmail, userById, type Context, type User } from './context';
+import {
+  pepper,
+  totpKey,
+  checkNewPassword,
+  emailLink,
+  findEmailToken,
+  useEmailToken,
+  resetLink,
+  useRecoveryCode,
+  recoveryCodesLeft,
+  passkeyCount,
+  requireTerms,
+  type EmailTokenRow,
+} from './common';
+import { isoTime, userByEmail, userById, type Context, type User } from './context';
 import { decryptSecret, DUMMY_PASSWORD_HASH, hashPassword, passwordNeedsRehash, randomId, randomToken, sha256, verifyPassword } from './crypto';
 import { sendEmail } from './email';
 import { cancelPendingStatement } from './email-change';
+import { connectedGitHub } from './github';
 import { clearCookie, HttpError, isEmail, limitAuth, normalizeEmail, ok, readCookie, setCookie, str, type Json } from './http';
 import { authenticate, authenticationOptions } from './passkeys';
 import { endSession, loadSession, refuseSuspended, requireSession, rotateSession, startSession } from './sessions';
 import { matchTotp } from './totp';
 import { TERMS_VERSION } from '../../src/lib/legal';
+
+export type SecondStepMethods = { totp: boolean; passkey: boolean; recovery: boolean };
 
 export const SIGN_IN_COOKIE = '__Host-pirs_signin';
 const SECOND_STEP_TTL = 10 * 60 * 1000;
@@ -28,13 +44,7 @@ export async function signUp(c: Context, body: Json): Promise<Response> {
   const email = readEmail(body);
   const password = str(body, 'password', 1024);
   checkNewPassword(password, email);
-  if (body.acceptTerms !== true) {
-    throw new HttpError(400, 'terms_required', 'Confirm that you are 18 or older and agree to the Terms of Service.', { field: 'acceptTerms' });
-  }
-  // The version on the page the user agreed to, so a form opened before a Terms change cannot record the new version.
-  if (body.termsVersion !== TERMS_VERSION) {
-    throw new HttpError(409, 'terms_changed', 'The Terms of Service changed. Reload this page and review them before you create your account.', { field: 'acceptTerms' });
-  }
+  requireTerms(body);
   const key = pepper(c);
   const existing = await userByEmail(c, email);
   if (existing) {
@@ -74,10 +84,26 @@ export async function signUp(c: Context, body: Json): Promise<Response> {
   return ok({ next: 'check_email' });
 }
 
-async function hasSecondStep(c: Context, user: User): Promise<{ totp: boolean; passkey: boolean; recovery: boolean } | undefined> {
+export async function hasSecondStep(c: Context, user: User): Promise<SecondStepMethods | undefined> {
   const passkeys = await passkeyCount(c, user.id);
   if (!user.totp_enabled_at && passkeys === 0) return undefined;
   return { totp: Boolean(user.totp_enabled_at), passkey: passkeys > 0, recovery: (await recoveryCodesLeft(c, user.id)) > 0 };
+}
+
+/** After the first step (a password or GitHub), a sign-in challenge waits for the second step for 10 minutes. */
+export async function startSecondStep(c: Context, user: User): Promise<void> {
+  const token = randomToken();
+  const now = Date.now();
+  await c.env.DB.batch([
+    c.env.DB.prepare('DELETE FROM sign_in_challenges WHERE expires_at < ?').bind(now),
+    c.env.DB.prepare('INSERT INTO sign_in_challenges (token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)').bind(
+      await sha256(token),
+      user.id,
+      now,
+      now + SECOND_STEP_TTL,
+    ),
+  ]);
+  c.cookies.push(setCookie(SIGN_IN_COOKIE, token, SECOND_STEP_TTL / 1000));
 }
 
 /** POST /api/account/sign-in with email and password. With two-step on, it starts the second step instead. */
@@ -87,7 +113,8 @@ export async function signIn(c: Context, body: Json): Promise<Response> {
   const password = str(body, 'password', 1024);
   const key = pepper(c);
   const user = isEmail(email) ? await userByEmail(c, email) : null;
-  const valid = await verifyPassword(password, user?.password_hash ?? DUMMY_PASSWORD_HASH, key);
+  // An account made with GitHub has no password (''); the dummy hash keeps the timing the same.
+  const valid = await verifyPassword(password, user?.password_hash || DUMMY_PASSWORD_HASH, key);
   if (!user || !valid) throw new HttpError(401, 'invalid_credentials', 'Wrong email or password.');
   if (passwordNeedsRehash(user.password_hash)) {
     await c.env.DB.prepare('UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?').bind(await hashPassword(password, key), Date.now(), user.id).run();
@@ -95,18 +122,7 @@ export async function signIn(c: Context, body: Json): Promise<Response> {
   refuseSuspended(user);
   const methods = await hasSecondStep(c, user);
   if (methods) {
-    const token = randomToken();
-    const now = Date.now();
-    await c.env.DB.batch([
-      c.env.DB.prepare('DELETE FROM sign_in_challenges WHERE expires_at < ?').bind(now),
-      c.env.DB.prepare('INSERT INTO sign_in_challenges (token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)').bind(
-        await sha256(token),
-        user.id,
-        now,
-        now + SECOND_STEP_TTL,
-      ),
-    ]);
-    c.cookies.push(setCookie(SIGN_IN_COOKIE, token, SECOND_STEP_TTL / 1000));
+    await startSecondStep(c, user);
     return ok({ next: 'two_step', methods });
   }
   await startSession(c, user, { reauth: true });
@@ -248,15 +264,36 @@ export async function requestReset(c: Context, body: Json): Promise<Response> {
   return ok({ next: 'check_email' });
 }
 
-/** POST /api/account/reset with the token from the email link and a new password. Signs out everywhere. */
-export async function resetPassword(c: Context, body: Json): Promise<Response> {
+/** The account of an unused reset link, without using it up. */
+async function resetTarget(c: Context, body: Json): Promise<{ row: EmailTokenRow; user: User }> {
   await limitAuth(c.env.AUTH_LIMITER, c.request, 'reset');
   const row = await findEmailToken(c, str(body, 'token', 200), 'reset');
   const user = await userById(c, row.user_id);
   if (!user || user.email !== row.email) throw new HttpError(400, 'invalid_token', 'This link has expired or was already used.');
+  return { row, user };
+}
+
+/**
+ * POST /api/account/reset/check with the token from the email link: whether it works, and the GitHub account
+ * that can sign in, so the owner can disconnect it with the reset (docs/accounts.md, "Resetting the Password").
+ */
+export async function checkReset(c: Context, body: Json): Promise<Response> {
+  const { user } = await resetTarget(c, body);
+  const github = await connectedGitHub(c, user.id);
+  return ok({ github: github ? { login: github.login, connectedAt: isoTime(github.created_at) } : null });
+}
+
+/**
+ * POST /api/account/reset with the token from the email link and a new password. Signs out everywhere. A
+ * connected GitHub account stays unless `disconnectGitHub` is true; the email says it can still sign in.
+ */
+export async function resetPassword(c: Context, body: Json): Promise<Response> {
+  const { row, user } = await resetTarget(c, body);
   const password = str(body, 'password', 1024);
   checkNewPassword(password, user.email);
   const hash = await hashPassword(password, pepper(c));
+  const github = await connectedGitHub(c, user.id);
+  const disconnectGitHub = Boolean(github) && body.disconnectGitHub === true;
   await useEmailToken(c, row);
   const now = Date.now();
   await c.env.DB.batch([
@@ -266,11 +303,14 @@ export async function resetPassword(c: Context, body: Json): Promise<Response> {
     c.env.DB.prepare('DELETE FROM cli_tokens WHERE user_id = ?').bind(user.id),
     c.env.DB.prepare('DELETE FROM sign_in_challenges WHERE user_id = ?').bind(user.id),
     c.env.DB.prepare("DELETE FROM email_tokens WHERE user_id = ? AND purpose = 'reset'").bind(user.id),
+    c.env.DB.prepare('DELETE FROM github_states WHERE user_id = ?').bind(user.id),
     // The reset link went to the account's address, so a waiting email change, perhaps someone else's, ends.
     cancelPendingStatement(c, user.id),
+    ...(disconnectGitHub ? [c.env.DB.prepare('DELETE FROM github_accounts WHERE user_id = ?').bind(user.id)] : []),
   ]);
   c.cookies.push(clearCookie(SIGN_IN_COOKIE));
-  sendEmail(c.env, c.request, c.ctx, user.email, { kind: 'password-changed', resetLink: resetLink(c) });
+  if (github && disconnectGitHub) sendEmail(c.env, c.request, c.ctx, user.email, { kind: 'github-disconnected', login: github.login, resetLink: resetLink(c) });
+  sendEmail(c.env, c.request, c.ctx, user.email, { kind: 'password-changed', resetLink: resetLink(c), github: disconnectGitHub ? undefined : github?.login });
   return ok({ next: 'sign_in' });
 }
 
@@ -278,7 +318,7 @@ export async function resetPassword(c: Context, body: Json): Promise<Response> {
 export async function reauthPassword(c: Context, body: Json): Promise<Response> {
   await limitAuth(c.env.AUTH_LIMITER, c.request, 'reauth');
   const { session, user } = await requireSession(c);
-  if (!(await verifyPassword(str(body, 'password', 1024), user.password_hash, pepper(c)))) {
+  if (!(await verifyPassword(str(body, 'password', 1024), user.password_hash || DUMMY_PASSWORD_HASH, pepper(c)))) {
     throw new HttpError(401, 'invalid_credentials', 'Wrong password.', { field: 'password' });
   }
   await rotateSession(c, session, { reauth: true });

@@ -8,6 +8,8 @@ import {
   cliClient,
   cliToken,
   devState,
+  githubAccount,
+  githubTrip,
   PASSWORD,
   uniqueEmail,
   verifiedAccount,
@@ -27,6 +29,7 @@ interface Person {
   suspendedAt: string | null;
   shares: number;
   cliTokens: number;
+  github: string | null;
   you: boolean;
 }
 
@@ -178,6 +181,15 @@ test('admins change roles, sign accounts out, and delete them, but never their o
   expect((await admin.get(`/api/admin/users?q=${encodeURIComponent(email)}`)).ok()).toBe(true);
   expect((await (await admin.get(`/api/admin/users?q=${encodeURIComponent(email)}`)).json()).users).toEqual([]);
   expect((await admin.post(`/api/admin/users/${person.id}/delete`, { data: {} })).status()).toBe(404);
+});
+
+test('admins see the connected GitHub username and find accounts by it', async ({ playwright, baseURL }) => {
+  const { client: admin } = await adminAccount(playwright, baseURL!);
+  const { client, email } = await verifiedAccount(playwright, baseURL!);
+  expect((await findPerson(admin, email)).github).toBeNull();
+  const github = githubAccount('admin-view');
+  expect(await githubTrip(client, 'connect', github)).toBe('/account/security/?github=connected');
+  expect(await findPerson(admin, github.login)).toMatchObject({ email, github: github.login });
 });
 
 test('admins list every share, make one private, and delete one; their views are not counted', async ({ playwright, baseURL }) => {

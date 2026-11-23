@@ -152,3 +152,40 @@ export async function createVerified(request: APIRequestContext, email: string):
   const mail = await waitForMail(request, email, /Verify your email/);
   expect((await request.post('/api/account/verify', { data: { token: tokenOf(linkIn(mail, /\/account\/verify\//)) } })).status()).toBe(200);
 }
+
+/** An account on the fake GitHub that local tests sign in with (worker/accounts/dev.ts). */
+export interface FakeGitHubAccount {
+  id: number;
+  login: string;
+  email: string;
+  verified: boolean;
+}
+
+/** A GitHub account with a random ID and a verified primary email of its own. */
+export function githubAccount(tag: string): FakeGitHubAccount {
+  return { id: randomBytes(4).readUInt32BE() + 1, login: `${tag}-${randomBytes(3).toString('hex')}`, email: uniqueEmail(tag), verified: true };
+}
+
+/** Approves an authorize URL on the fake GitHub as `account`. Returns the callback path, with its code and state. */
+export async function approveOnGitHub(request: APIRequestContext, url: string, account: FakeGitHubAccount): Promise<string> {
+  const authorize = new URL(url);
+  expect(authorize.pathname).toBe('/__dev/github/authorize');
+  const query = new URLSearchParams(authorize.searchParams);
+  query.set('id', String(account.id));
+  query.set('login', account.login);
+  query.set('email', account.email);
+  if (account.verified) query.set('verified', 'on');
+  const approved = await request.get(`/__dev/github/approve?${query}`, { maxRedirects: 0 });
+  expect(approved.status()).toBe(302);
+  const callback = new URL(approved.headers().location);
+  return callback.pathname + callback.search;
+}
+
+/** Goes to the fake GitHub and back as `account`, and returns where the callback sends the browser. */
+export async function githubTrip(client: APIRequestContext, intent: 'sign-in' | 'connect' | 'reauth', account: FakeGitHubAccount, next?: string): Promise<string> {
+  const start = await client.post('/api/account/github/start', { data: { intent, next } });
+  expect(start.status()).toBe(200);
+  const done = await client.get(await approveOnGitHub(client, (await start.json()).url, account), { maxRedirects: 0 });
+  expect(done.status()).toBe(302);
+  return done.headers().location;
+}

@@ -278,6 +278,12 @@
   border-top: 1px solid var(--hairline);
 }
 
+/* Sign-in with GitHub or a passkey, below the divider. */
+.other-ways {
+  display: grid;
+  gap: 12px;
+}
+
 .notice {
   margin-top: 20px;
   padding: 12px 14px;
@@ -824,6 +830,14 @@
 }
 
 .dialog__foot > .link-button {
+  margin-right: auto;
+}
+
+/* Other ways to confirm it's you, on the left. */
+.dialog__ways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
   margin-right: auto;
 }
 

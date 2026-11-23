@@ -1,0 +1,40 @@
+---
+/**
+ * The required Terms box of sign-up. `errorId` is the id of its error line. A step with no text field
+ * before the box focuses it first (data-focus).
+ */
+interface Props {
+  errorId: string;
+}
+
+const { errorId } = Astro.props;
+---
+
+<div class="field">
+  <label class="check terms">
+    <input type="checkbox" name="acceptTerms" aria-describedby={errorId} required data-focus />
+    <span>
+      I am 18 or older, and I agree to the <a href="/terms/" target="_blank">Terms of Service</a>. I have read the{' '}
+      <a href="/privacy/" target="_blank">Privacy Policy</a>.
+    </span>
+  </label>
+  <p class="field__error" id={errorId} role="alert"></p>
+</div>
+
+<style>
+  /* The label wraps onto several lines, so the box sits beside its first line. */
+  .terms {
+    align-items: flex-start;
+    line-height: 1.45;
+  }
+
+  .terms input {
+    flex: none;
+    margin-top: 2px;
+  }
+
+  .terms a {
+    color: var(--ink);
+    text-underline-offset: 0.2em;
+  }
+</style>

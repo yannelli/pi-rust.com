@@ -2,11 +2,11 @@
 import Panel from '../../layouts/Panel.astro';
 ---
 
-<Panel title="Security" active="security" description="Password, two-step verification, passkeys, and where your pi-rust account is signed in.">
+<Panel title="Security" active="security" description="Password, GitHub, two-step verification, passkeys, and where your pi-rust account is signed in.">
   <section class="section" aria-labelledby="password-title">
     <div class="section__body">
       <h2 id="password-title">Password</h2>
-      <p class="section__desc">Changing it signs you out of your other browser sessions.</p>
+      <p class="section__desc" data-password-desc>Changing it signs you out of your other browser sessions.</p>
       <form class="form" method="dialog" novalidate data-password-form hidden>
         <div class="field">
           <label for="new-password">New password</label>
@@ -23,6 +23,18 @@ import Panel from '../../layouts/Panel.astro';
     <div class="section__foot" data-password-foot>
       <span></span>
       <button class="btn btn--secondary btn--small" type="button" data-password-open>Change password</button>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="github-title">
+    <div class="section__body">
+      <h2 id="github-title">GitHub</h2>
+      <p class="section__desc">Sign in with your GitHub account. If two-step verification is on, GitHub sign-in asks for it too.</p>
+    </div>
+    <div class="section__foot">
+      <span data-github-status></span>
+      <button class="btn btn--secondary btn--small" type="button" data-github-connect hidden>Connect GitHub</button>
+      <button class="btn btn--danger btn--small" type="button" data-github-disconnect hidden>Disconnect</button>
     </div>
   </section>
 

@@ -1,6 +1,11 @@
-/** Sign-in: email, then password, then the second step when the account has one. Or a passkey alone. */
+/**
+ * Sign-in: email, then password, then the second step when the account has one. Or GitHub, which comes back
+ * here for the second step (?two_step=), to connect GitHub once the owner of its email signs in (?github=link),
+ * or with an error (?github_error=). Or a passkey alone.
+ */
 
 import { api, ApiError, nextPath } from './api';
+import { githubErrorMessage, goToGitHub, takeParam } from './github';
 import { passkeysSupported, usePasskey } from './passkey';
 import { $, busy, clearErrors, input, setFieldError, showError, showStep } from './ui';
 
@@ -11,6 +16,10 @@ const passwordForm = $('[data-password-form]') as HTMLFormElement;
 const totpForm = $('[data-totp-form]') as HTMLFormElement;
 const recoveryForm = $('[data-recovery-form]') as HTMLFormElement;
 let methods: Methods = { totp: false, passkey: false, recovery: false };
+/** The first step was GitHub, so there is no password step to go back to. */
+let viaGitHub = false;
+/** GitHub came back with the email of this account, and is connected once the sign-in is done. */
+let linking = false;
 
 const params = new URLSearchParams(location.search);
 const NOTICES: Record<string, string> = {
@@ -31,8 +40,18 @@ for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-keep-next
   if (params.has('next')) link.search = `?next=${encodeURIComponent(nextPath())}`;
 }
 
-function done(): void {
-  location.assign(nextPath());
+async function done(): Promise<void> {
+  const next = new URL(nextPath(), location.origin);
+  if (linking) {
+    try {
+      await api('github/link', { body: {} });
+    } catch (error) {
+      location.assign(`/account/security/?github_error=${error instanceof ApiError && error.code === 'github_taken' ? 'taken' : 'not_linked'}`);
+      return;
+    }
+    if (next.pathname.startsWith('/account/')) next.searchParams.set('github', 'connected');
+  }
+  location.assign(next.pathname + next.search);
 }
 
 emailForm.addEventListener('submit', (event) => {
@@ -82,14 +101,17 @@ passwordForm.addEventListener('submit', async (event) => {
   }
 });
 
-/** A second step that expired goes back to the password. */
+/** A second step that expired goes back to the password, or after GitHub, to the start. */
 function restartIfExpired(error: unknown): boolean {
-  if (error instanceof ApiError && error.code === 'sign_in_expired') {
+  if (!(error instanceof ApiError && error.code === 'sign_in_expired')) return false;
+  if (viaGitHub) {
+    showStep('email');
+    showOtherError(error.message);
+  } else {
     showStep('password');
     showError(passwordForm, error, 'password');
-    return true;
   }
-  return false;
+  return true;
 }
 
 for (const [form, path] of [
@@ -130,16 +152,59 @@ $('[data-second-passkey]').addEventListener('click', async (event) => {
   }
 });
 
-const passkeyEntry = $('[data-passkey-entry]');
-const passkeyError = $('[data-passkey-error]');
-if (!passkeysSupported()) passkeyEntry.hidden = true;
-$('[data-passkey-sign-in]').addEventListener('click', async (event) => {
-  passkeyError.hidden = true;
+const otherError = $('[data-other-error]');
+
+function showOtherError(message: string): void {
+  otherError.textContent = message;
+  otherError.hidden = false;
+}
+
+$('[data-github-start]').addEventListener('click', async (event) => {
+  otherError.hidden = true;
   try {
-    await busy(event.currentTarget as HTMLButtonElement, () => usePasskey('sign-in/passkey/options', 'sign-in/passkey'));
-    done();
+    await busy(event.currentTarget as HTMLButtonElement, () => goToGitHub('sign-in', nextPath()));
   } catch (error) {
-    passkeyError.textContent = (error as Error).message;
-    passkeyError.hidden = false;
+    showOtherError((error as Error).message);
   }
 });
+
+const passkeyButton = $('[data-passkey-sign-in]') as HTMLButtonElement;
+if (!passkeysSupported()) passkeyButton.hidden = true;
+passkeyButton.addEventListener('click', async () => {
+  otherError.hidden = true;
+  try {
+    await busy(passkeyButton, () => usePasskey('sign-in/passkey/options', 'sign-in/passkey'));
+    done();
+  } catch (error) {
+    showOtherError((error as Error).message);
+  }
+});
+
+const githubError = takeParam('github_error');
+if (githubError) showOtherError(githubErrorMessage(githubError));
+
+if (params.get('github') === 'link') {
+  const githubButton = $('[data-github-start]');
+  linking = true;
+  githubButton.hidden = true;
+  api<{ login: string; email: string }>('github/link').then(
+    ({ login, email }) => {
+      notice.textContent = `${email} already has an account. Sign in to connect the GitHub account ${login} to it.`;
+      notice.hidden = false;
+      input(emailForm, 'email').value = email;
+    },
+    (error: Error) => {
+      linking = false;
+      githubButton.hidden = false;
+      showOtherError(error.message);
+    },
+  );
+}
+
+const twoStep = takeParam('two_step');
+if (twoStep !== null) {
+  const available = twoStep.split(',');
+  methods = { totp: available.includes('totp'), passkey: available.includes('passkey'), recovery: available.includes('recovery') };
+  viaGitHub = true;
+  secondStep(methods.totp ? 'totp' : methods.passkey && passkeysSupported() ? 'passkey' : 'recovery');
+}

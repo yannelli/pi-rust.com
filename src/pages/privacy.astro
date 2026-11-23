@@ -77,7 +77,8 @@ const headings = [
   <p>We use the following to sign you in, keep your account secure, and let you manage it:</p>
   <ul>
     <li>Your email address. We also use it to send you email about your account.</li>
-    <li>Your password, stored only as a salted hash with a secret pepper. We cannot read it.</li>
+    <li>Your password, if you set one, stored only as a salted hash with a secret pepper. We cannot read it.</li>
+    <li>If you sign in with GitHub, your GitHub user ID and username, and when you connected GitHub and last signed in with it. When you create an account with GitHub, GitHub also gives us the verified primary email address of your GitHub account, and that becomes the email address of your account. We do not keep the access token GitHub gives us.</li>
     <li>For two-step verification, the secret of your authenticator app, stored encrypted, and your recovery codes, stored only as hashes.</li>
     <li>For each passkey, its credential ID and public key, the model ID of the authenticator, the kind of device and how it connects, whether it is backed up, its signature counter, the name you give it, and when you added and last used it. Your device’s fingerprint or face scan never reaches us.</li>
     <li>For each browser session, a device label such as “Chrome on macOS”, and when the session started and was last used.</li>
@@ -86,7 +87,8 @@ const headings = [
     <li>The version of the Terms of Service you accepted, and when.</li>
     <li>If you change your email address, the old and the new address, and when you asked for the change. We send a link to the new address and a notice to the old one, and after the change, a link to the old address that undoes it. An hourly job deletes these records after the links expire, or sooner when the change is canceled.</li>
   </ul>
-  <p>We send only email about your account: verification links, password resets, security alerts, such as a new passkey or a password or email address change, and notice of material changes to the Terms of Service or this policy. We do not send newsletters or marketing email.</p>
+  <p>When you sign in with GitHub, you sign in on github.com, and the <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub privacy statement</a> covers what GitHub collects. You can disconnect GitHub on your <a href="/account/security/">Security page</a>.</p>
+  <p>We send only email about your account: verification links, password resets, security alerts, such as a new passkey, a GitHub account connected, or a password or email address change, and notice of material changes to the Terms of Service or this policy. We do not send newsletters or marketing email.</p>
 
   <h3 id="shares">When you share a session</h3>
   <p>When you share a session to your pi-rust.com account, pi-rust uploads it as one HTML file. We store the file and its title, size, creation date, expiry, and visibility, and how many times it was viewed and when it was last viewed.</p>
@@ -134,13 +136,14 @@ const headings = [
   <p>We do not sell, rent, or trade personal information. We do not collect, use, or sell personal information to train large language models or other AI models. We do not use it for targeted advertising, or for profiling that leads to decisions with legal or similarly significant effects on you.</p>
 
   <h2 id="cookies">Cookies and local storage</h2>
-  <p>pi-rust.com sets two cookies, both for signing in, and the install page can keep one value in your browser’s local storage.</p>
+  <p>pi-rust.com sets three cookies, all for signing in, and the install page can keep one value in your browser’s local storage.</p>
   <div class="table">
     <table>
       <thead><tr><th>Name</th><th>What it does</th><th>How long it lasts</th></tr></thead>
       <tbody>
         <tr><td><code>__Host-pirs_session</code></td><td>Keeps you signed in</td><td>30 days after you last use your account in the browser, or until you sign out</td></tr>
-        <tr><td><code>__Host-pirs_signin</code></td><td>Holds a password sign-in while you finish two-step verification</td><td>10 minutes</td></tr>
+        <tr><td><code>__Host-pirs_signin</code></td><td>Holds a password or GitHub sign-in while you finish two-step verification</td><td>10 minutes</td></tr>
+        <tr><td><code>__Host-pirs_github</code></td><td>Holds a sign-in with GitHub while you are on GitHub, or until you accept the Terms for a new account</td><td>10 minutes</td></tr>
         <tr><td><code>pi-rust.os</code> (local storage)</td><td>Remembers the platform you picked on the install page</td><td>Until you clear your browser data</td></tr>
       </tbody>
     </table>
@@ -154,7 +157,7 @@ const headings = [
     <li><strong>Cloudflare</strong>, which hosts the site and runs its database, file storage, email delivery, rate limits, and analytics. Cloudflare processes the data for us. Its data centers can be in or outside the United States.</li>
     <li><strong>Google</strong>, the maintainer’s email provider, which stores the copy of each bug report that is emailed to the maintainer.</li>
     <li><strong>People with a share link.</strong> Anyone who has the link to a share set to Anyone with the link can open it.</li>
-    <li><strong>Admins</strong>: the maintainer and the people he makes admins. They can see account email addresses, sign-up and last active dates, the titles, owners, and sizes of shares, the content of shares that anyone with the link can open, and bug reports. The admin area does not let admins open a share set to Only me or see passwords, two-step secrets, tokens, or IP addresses. The maintainer also has access to the hosting and storage systems themselves. The admin area records each change an admin makes in an activity log.</li>
+    <li><strong>Admins</strong>: the maintainer and the people he makes admins. They can see account email addresses, the GitHub username connected to an account, sign-up and last active dates, the titles, owners, and sizes of shares, the content of shares that anyone with the link can open, and bug reports. The admin area does not let admins open a share set to Only me or see passwords, two-step secrets, tokens, or IP addresses. The maintainer also has access to the hosting and storage systems themselves. The admin area records each change an admin makes in an activity log.</li>
     <li><strong>Copyright claimants.</strong> When we get a valid counter notice, we send it, with its contact details, to the person who sent the original copyright notice.</li>
     <li><strong>Legal and safety disclosures.</strong> We disclose information when the law requires or permits it, for example in response to valid legal process, in an emergency that involves danger of death or serious physical injury, in reports that federal law requires to the CyberTipline of the National Center for Missing &amp; Exploited Children, or to protect our rights and property. We disclose the content of a private share only when the law permits it.</li>
     <li><strong>A new operator</strong>, if pi-rust.com changes hands. We require the new operator to honor this policy for the data collected under it, and we email account holders before the data moves.</li>
@@ -167,8 +170,9 @@ const headings = [
       <tbody>
         <tr><td>Account data</td><td>Until you delete the account, or an admin deletes it</td></tr>
         <tr><td>Browser session</td><td>30 days after its last use, or until you sign out</td></tr>
+        <tr><td>GitHub connection</td><td>Until you disconnect GitHub, or the account is deleted</td></tr>
         <tr><td>pi CLI token</td><td>Until you revoke it, sign out with <code>/logout</code>, reset your password, or delete the account</td></tr>
-        <tr><td>Email links, pending sign-ins, and pi CLI sign-in requests</td><td>An hourly job deletes them after they expire. It keeps pi CLI sign-in requests one more day, so that a late request gets an expiry answer. Pending sign-ins expire after 10 minutes, pi CLI sign-in requests after 15 minutes, reset links after 30 minutes, verification links and links to confirm a new email address after 24 hours, and links that undo an email address change after 7 days.</td></tr>
+        <tr><td>Email links, pending sign-ins, and pi CLI sign-in requests</td><td>An hourly job deletes them after they expire. It keeps pi CLI sign-in requests one more day, so that a late request gets an expiry answer. Pending sign-ins, including sign-ins with GitHub, expire after 10 minutes, pi CLI sign-in requests after 15 minutes, reset links after 30 minutes, verification links and links to confirm a new email address after 24 hours, and links that undo an email address change after 7 days.</td></tr>
         <tr><td>Shared session</td><td>Until it expires, you delete it, or the account is deleted. An expired share is usually deleted within an hour.</td></tr>
         <tr><td>Bug report</td><td>90 days, for the stored files and for the copy emailed to the maintainer</td></tr>
         <tr><td>Install ping</td><td>3 months</td></tr>
@@ -184,7 +188,7 @@ const headings = [
   <h2 id="your-rights">Your rights and choices</h2>
   <p>Some state laws give their residents rights over their personal information. Anyone can make the requests below, wherever you live. We verify requests as needed, and we explain any limit on what we can provide. The law where you live may give you more rights or a shorter answer time.</p>
   <ul>
-    <li><strong>Access.</strong> Your account pages show your email address, sessions, pi CLI tokens, passkeys, two-step settings, and every share, which you can download. To get the other personal information we can identify as yours, in a portable format such as JSON, email us. We do not send passwords, security secrets, other people’s information, or information the law requires us to withhold.</li>
+    <li><strong>Access.</strong> Your account pages show your email address, sessions, pi CLI tokens, passkeys, the GitHub account you connected, two-step settings, and every share, which you can download. To get the other personal information we can identify as yours, in a portable format such as JSON, email us. We do not send passwords, security secrets, other people’s information, or information the law requires us to withhold.</li>
     <li><strong>Correction.</strong> Change your email address on your <a href="/account/settings/">Account page</a>. To correct anything else, email us.</li>
     <li><strong>Deletion.</strong> Delete any share, or your whole account, on your account pages. If your account is suspended, email us. To delete a bug report before its 90 days end, email us its report ID, which pi-rust saves in your session, or the date you sent it and your pi-rust version.</li>
     <li><strong>Opting out.</strong> We do not sell personal information or use it for targeted advertising or profiling, so there is nothing to opt out of. You can still send us an opt-out request, and we will confirm it.</li>

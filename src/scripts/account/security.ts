@@ -1,14 +1,23 @@
-/** Security: password, two-step verification, recovery codes, passkeys, sessions, and CLI tokens. */
+/** Security: password, GitHub, two-step verification, recovery codes, passkeys, sessions, and CLI tokens. */
 
 import { renderSVG } from 'uqr';
 import { api } from './api';
+import { goToGitHub } from './github';
 import { account, confirmAction, reportError, sensitive } from './panel';
 import { addPasskey, passkeysSupported } from './passkey';
 import { $, busy, clearErrors, copyText, el, formatDate, input, relativeTime, setFieldError, showError, toast } from './ui';
 
-// Password
+// Password. An account made with GitHub has none until its owner sets one.
 const passwordForm = $('[data-password-form]') as HTMLFormElement;
 const passwordFoot = $('[data-password-foot]');
+
+async function renderPassword(fresh = false): Promise<void> {
+  const { account: info } = await account(fresh);
+  $('[data-password-desc]').textContent = info.password
+    ? 'Changing it signs you out of your other browser sessions.'
+    : 'Your account has no password. Set one to also sign in with your email address.';
+  $('[data-password-open]').textContent = info.password ? 'Change password' : 'Set password';
+}
 
 $('[data-password-open]').addEventListener('click', () => {
   passwordForm.hidden = false;
@@ -36,10 +45,43 @@ passwordForm.addEventListener('submit', async (event) => {
     const result = await busy(passwordForm.querySelector('button[type=submit]'), () => sensitive(() => api('password', { body: { password: password.value } })));
     if (!result) return;
     closePasswordForm();
-    toast('Password changed');
+    toast('Password saved');
+    renderPassword(true);
     loadSessions();
   } catch (error) {
     showError(passwordForm, error, 'password');
+  }
+});
+
+// GitHub
+const githubConnect = $('[data-github-connect]') as HTMLButtonElement;
+const githubDisconnect = $('[data-github-disconnect]') as HTMLButtonElement;
+
+async function renderGitHub(fresh = false): Promise<void> {
+  const { github } = (await account(fresh)).account;
+  const used = github?.lastUsedAt ? ` · Last used ${relativeTime(github.lastUsedAt)}` : '';
+  $('[data-github-status]').textContent = github ? `Connected to ${github.login}${used}` : '';
+  githubConnect.hidden = Boolean(github);
+  githubDisconnect.hidden = !github;
+}
+
+githubConnect.addEventListener('click', async () => {
+  try {
+    await busy(githubConnect, () => sensitive(() => goToGitHub('connect')));
+  } catch (error) {
+    reportError(error);
+  }
+});
+
+githubDisconnect.addEventListener('click', async () => {
+  if (!(await confirmAction('Disconnect GitHub?', 'You can no longer sign in with this GitHub account.', 'Disconnect'))) return;
+  try {
+    const result = await busy(githubDisconnect, () => sensitive(() => api('github', { method: 'DELETE' })));
+    if (!result) return;
+    toast('GitHub disconnected');
+    renderGitHub(true);
+  } catch (error) {
+    reportError(error);
   }
 });
 
@@ -345,6 +387,8 @@ async function loadTokens(): Promise<void> {
   }
 }
 
+renderPassword();
+renderGitHub();
 renderTwoStep();
 loadPasskeys();
 loadSessions();
