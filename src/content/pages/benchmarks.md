@@ -124,8 +124,8 @@ A stronger follow-up test needs these conditions:
 
 ## Data files
 
-- [Pi Rust samples](https://github.com/yannelli/pi-rust/blob/v0.12.33/docs/benchmarks/concurrent-sessions/pi-rust.json)
-- [Node Pi samples](https://github.com/yannelli/pi-rust/blob/v0.12.33/docs/benchmarks/concurrent-sessions/pi-node.json)
-- [Codex CLI samples](https://github.com/yannelli/pi-rust/blob/v0.12.33/docs/benchmarks/concurrent-sessions/codex.json)
+- [Pi Rust samples](https://github.com/yannelli/pi-rust/blob/v0.12.34/docs/benchmarks/concurrent-sessions/pi-rust.json)
+- [Node Pi samples](https://github.com/yannelli/pi-rust/blob/v0.12.34/docs/benchmarks/concurrent-sessions/pi-node.json)
+- [Codex CLI samples](https://github.com/yannelli/pi-rust/blob/v0.12.34/docs/benchmarks/concurrent-sessions/codex.json)
 
 The files keep the measured timestamps, RSS, CPU values, process IDs, summaries, and exit codes. Machine-local log and session paths were removed. The files do not include model transcripts or credentials. The CPU values are as collected. This report does not use them to claim CPU utilization improvements.

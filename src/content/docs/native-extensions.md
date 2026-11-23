@@ -4,7 +4,7 @@ description: "Created 2026-10-29. Last updated 2026-11-02. A native extension is
 group: "Extensions"
 order: 41
 source: "docs/extensions/native-protocol.md"
-ref: "v0.12.33"
+ref: "v0.12.34"
 lead: false
 ---
 

@@ -4,7 +4,7 @@ description: "Run pi --help to see all options. This page explains session worki
 group: "Use pi"
 order: 11
 source: "crates/pi-coding-agent/docs/cli.md"
-ref: "v0.12.33"
+ref: "v0.12.34"
 lead: false
 ---
 
@@ -244,4 +244,4 @@ PI_NODE_PATH=/opt/node22/bin/node pi --extension-runtime node
 - pi finds `node` in `PI_NODE_PATH`, then on `PATH`.
 - If Node is missing, older than version 22, or does not start, pi shows one warning and uses QuickJS.
 
-See [Node backend](https://github.com/yannelli/pi-rust/blob/v0.12.33/docs/agents/node-compat.md#node-backend) for how the backend works.
+See [Node backend](https://github.com/yannelli/pi-rust/blob/v0.12.34/docs/agents/node-compat.md#node-backend) for how the backend works.

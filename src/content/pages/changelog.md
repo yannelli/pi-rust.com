@@ -3,6 +3,16 @@ title: "Changelog"
 source: "CHANGELOG.md"
 ---
 
+## 0.12.34
+
+Released November 23, 2026.
+
+### Fixed
+
+- **ai:** keep the cause when a response stream breaks off ([bda3d45](https://github.com/yannelli/pi-rust/commit/bda3d4596de406197fdf35f9182163d4037afc12))
+- **ai:** retry Codex WebSocket connections dropped mid-reply ([ea9eb57](https://github.com/yannelli/pi-rust/commit/ea9eb5738893c00113d56f7a4b9f3262cf354bfc))
+- **ai:** retry dropped connections and cut response streams ([27b4e44](https://github.com/yannelli/pi-rust/commit/27b4e444054a7c9f36f3ca21d3283634897ea030))
+
 ## 0.12.33
 
 Released November 23, 2026.
