@@ -1,0 +1,31 @@
+---
+import Auth from '../../layouts/Auth.astro';
+---
+
+<Auth title="Confirm new email" description="Confirm the new email address of your pi-rust account.">
+  <section data-step="working">
+    <h1>Changing your email</h1>
+    <p class="card__lead">One moment.</p>
+  </section>
+
+  <section data-step="done" hidden>
+    <h1 data-focus>Email changed</h1>
+    <p class="card__lead">You now sign in with <strong data-new-email></strong>.</p>
+    <div class="actions actions--end">
+      <a class="btn btn--primary" href="/account/settings/" data-continue>Continue</a>
+    </div>
+  </section>
+
+  <section data-step="failed" hidden>
+    <h1 data-focus>This link doesn’t work</h1>
+    <p class="card__lead" data-failed-reason>It has expired or was already used.</p>
+    <p class="card__lead">Sign in to ask for a new link on your account page.</p>
+    <div class="actions actions--end">
+      <a class="btn btn--primary" href="/account/settings/">Go to account</a>
+    </div>
+  </section>
+</Auth>
+
+<script>
+  import '../../scripts/account/confirm-email.ts';
+</script>

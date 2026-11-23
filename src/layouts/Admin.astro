@@ -1,0 +1,78 @@
+---
+/**
+ * The admin pages: a sidebar of sections beside the page, as in a console. The Worker serves them only
+ * to signed-in admins (everyone else gets the 404 page), and the admin API also needs two-step
+ * verification; without it, the page shows how to turn it on. Never indexed. See docs/admin.md.
+ */
+import '../styles/account.css';
+import '../styles/admin.css';
+import Base from './Base.astro';
+import Dialogs from '../components/account/Dialogs.astro';
+import Icon from '../components/admin/Icon.astro';
+
+type Section = 'overview' | 'people' | 'shares' | 'bug-reports' | 'activity';
+
+interface Props {
+  title: string;
+  description: string;
+  active: Section;
+}
+
+const { title, description, active } = Astro.props;
+
+const NAV: { id: Section; label: string; href: string; icon: 'overview' | 'people' | 'shares' | 'bug' | 'activity' }[] = [
+  { id: 'overview', label: 'Overview', href: '/admin/', icon: 'overview' },
+  { id: 'people', label: 'People', href: '/admin/people/', icon: 'people' },
+  { id: 'shares', label: 'Shares', href: '/admin/shares/', icon: 'shares' },
+  { id: 'bug-reports', label: 'Bug reports', href: '/admin/bug-reports/', icon: 'bug' },
+  { id: 'activity', label: 'Activity', href: '/admin/activity/', icon: 'activity' },
+];
+---
+
+<Base title={title} fullTitle={`${title} · Admin · pi-rust`} description={description} noindex>
+  <div class="admin page">
+    <aside class="admin__side">
+      <p class="admin__label">Admin</p>
+      <nav class="admin__nav" aria-label="Admin">
+        {NAV.map((item) => (
+          <a href={item.href} aria-current={item.id === active ? 'page' : undefined}>
+            <Icon name={item.icon} />
+            <span>{item.label}</span>
+          </a>
+        ))}
+      </nav>
+      <div class="admin__me">
+        <span class="avatar" aria-hidden="true" data-admin-avatar></span>
+        <div class="admin__who">
+          <span data-account-email></span>
+          <a href="/account/">Your account</a>
+        </div>
+        <button class="link-button admin__out" type="button" data-sign-out>Sign out</button>
+      </div>
+    </aside>
+
+    <div class="admin__main">
+      <header class="admin__head">
+        <div>
+          <h1>{title}</h1>
+          <p>{description}</p>
+        </div>
+        <slot name="actions" />
+      </header>
+
+      <section class="gate" aria-labelledby="gate-title" data-admin-gate hidden>
+        <Icon name="shield" class="gate__icon" />
+        <h2 id="gate-title">Turn on two-step verification</h2>
+        <p data-admin-gate-text>The admin area needs two-step verification or a passkey on your account.</p>
+        <a class="btn btn--primary" href="/account/security/">Go to Security</a>
+      </section>
+
+      <div class="admin__content" data-admin-content>
+        <slot />
+      </div>
+    </div>
+  </div>
+
+  <div class="menu" id="row-menu" popover="manual" role="menu" data-row-menu></div>
+  <Dialogs />
+</Base>

@@ -1,0 +1,109 @@
+---
+import Base from '../layouts/Base.astro';
+import Logo from '../components/Logo.astro';
+---
+
+<Base title="Shared session" description="View a pi session that was shared as a GitHub gist." noindex bare>
+  <div class="viewer">
+    <header class="viewer__bar">
+      <a class="viewer__brand" href="/" aria-label="pi-rust home"><Logo size={20} /><span>pi-rust</span></a>
+      <span class="viewer__title" data-title>Shared session</span>
+      <a class="btn btn--secondary btn--small" href="https://gist.github.com/" rel="noopener" target="_blank" data-gist-link hidden>View gist</a>
+    </header>
+    <div class="viewer__state" data-state>
+      <h1 data-heading>Loading the session</h1>
+      <p data-message>Fetching the gist from GitHub.</p>
+    </div>
+    <iframe
+      class="viewer__frame"
+      title="Shared pi session"
+      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+      data-frame
+      hidden></iframe>
+  </div>
+</Base>
+
+<script>
+  import '../scripts/session-viewer.ts';
+</script>
+
+<style>
+  .viewer {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  .viewer__bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 48px;
+    padding: 0 var(--gutter);
+    border-bottom: 1px solid var(--hairline);
+    background: var(--paper);
+  }
+
+  .viewer__brand {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--t-14);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .viewer__title {
+    min-width: 0;
+    padding-left: 16px;
+    border-left: 1px solid var(--hairline-strong);
+    overflow: hidden;
+    color: var(--graphite);
+    font-size: var(--t-14);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .viewer__bar .btn {
+    margin-left: auto;
+  }
+
+  .viewer__state {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 8px;
+    flex: 1;
+    padding: 48px var(--gutter);
+    text-align: center;
+  }
+
+  .viewer__state h1 {
+    font-size: var(--t-24);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  .viewer__state p {
+    max-width: 52ch;
+    color: var(--graphite);
+  }
+
+  .viewer__frame {
+    display: block;
+    width: 100%;
+    height: calc(100dvh - 48px);
+    border: 0;
+    background: #fff;
+  }
+
+  .viewer__frame[hidden],
+  .viewer__state[hidden] {
+    display: none;
+  }
+</style>

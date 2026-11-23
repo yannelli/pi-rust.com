@@ -1,0 +1,86 @@
+---
+/** One command with a copy button. The copy button is hidden from search and reads "Copied" for a moment after a press. */
+interface Props {
+  command: string;
+  label?: string;
+  prompt?: string;
+}
+
+const { command, label, prompt = '$' } = Astro.props;
+---
+
+<div class="command">
+  <pre aria-label={label}><span class="command__prompt" aria-hidden="true">{prompt}</span><code>{command}</code></pre>
+  <button class="copy" type="button" data-copy={command} title="Copy">
+    <svg class="copy__icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="2" /><path d="M16 4.5V4a1 1 0 0 0-1-1H5a2 2 0 0 0-2 2v10a1 1 0 0 0 1 1h.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+    <svg class="copy__done" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    <span class="sr-only" data-copy-label>{label ? `Copy ${label}` : 'Copy'}</span>
+  </button>
+</div>
+
+<style>
+  .command {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 6px 6px 6px 18px;
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--hairline-strong);
+  }
+
+  pre {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    font-size: var(--t-14);
+    line-height: 1.5;
+    scrollbar-width: none;
+  }
+
+  pre::-webkit-scrollbar {
+    display: none;
+  }
+
+  .command__prompt {
+    margin-right: 10px;
+    color: var(--muted);
+    user-select: none;
+  }
+
+  code {
+    color: var(--ink);
+  }
+
+  .copy {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--hover);
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .copy:hover {
+    background: color-mix(in srgb, var(--hover) 60%, var(--hairline-strong));
+  }
+
+  .copy__done,
+  .copy[data-copied] .copy__icon {
+    display: none;
+  }
+
+  .copy[data-copied] .copy__done {
+    display: block;
+  }
+
+  .copy[data-copied] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+</style>

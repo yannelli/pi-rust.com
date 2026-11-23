@@ -1,0 +1,269 @@
+---
+import Docs from '../layouts/Docs.astro';
+import { OPERATOR, PRIVACY_EMAIL, SITE_REPO_URL } from '../lib/legal';
+import { AUTHOR } from '../lib/site';
+
+// Each statement restates what docs/ and the Worker say is stored, who sees it, and for how long.
+// When that changes, change this page and EFFECTIVE with it.
+const EFFECTIVE = 'November 23, 2026';
+const CONTACT = PRIVACY_EMAIL;
+
+const description =
+  'What pi-rust.com collects when you visit, sign in, share a session, or send a bug report, how long it keeps it, and how to see or delete it.';
+
+const headings = [
+  { depth: 2, slug: 'summary', text: 'Summary' },
+  { depth: 2, slug: 'who-we-are', text: 'Who we are' },
+  { depth: 2, slug: 'source-code', text: 'Source code' },
+  { depth: 2, slug: 'what-we-collect', text: 'What we collect and why' },
+  { depth: 3, slug: 'visits', text: 'When you visit the site' },
+  { depth: 3, slug: 'accounts', text: 'When you create an account' },
+  { depth: 3, slug: 'shares', text: 'When you share a session' },
+  { depth: 3, slug: 'gist-shares', text: 'When you open a gist share' },
+  { depth: 3, slug: 'bug-reports', text: 'When you send a bug report' },
+  { depth: 3, slug: 'install-telemetry', text: 'Install telemetry' },
+  { depth: 3, slug: 'model-catalog', text: 'Model catalog' },
+  { depth: 3, slug: 'email', text: 'When you email us' },
+  { depth: 2, slug: 'how-we-use-it', text: 'How we use personal information' },
+  { depth: 2, slug: 'cookies', text: 'Cookies and local storage' },
+  { depth: 2, slug: 'sharing', text: 'Who we share it with' },
+  { depth: 2, slug: 'retention', text: 'How long we keep it' },
+  { depth: 2, slug: 'your-rights', text: 'Your rights and choices' },
+  { depth: 3, slug: 'requests', text: 'How to make a request' },
+  { depth: 3, slug: 'appeals', text: 'How to appeal' },
+  { depth: 2, slug: 'security', text: 'Security' },
+  { depth: 2, slug: 'children', text: 'Children' },
+  { depth: 2, slug: 'state-notices', text: 'State notices' },
+  { depth: 2, slug: 'outside-us', text: 'Users in the EEA, the UK, and Switzerland' },
+  { depth: 2, slug: 'changes', text: 'Changes to this policy' },
+  { depth: 2, slug: 'contact', text: 'Contact' },
+];
+---
+
+<Docs title="Privacy policy" description={description} group="Legal" headings={headings} image="/og/privacy.png">
+  <p slot="before" class="privacy-date">Effective {EFFECTIVE}</p>
+
+  <h2 id="summary">Summary</h2>
+  <ul>
+    <li>You can read the docs and other public pages of pi-rust.com without an account.</li>
+    <li>The pages we write have no ads and no analytics or tracking scripts. Our own cookies are only for signing in.</li>
+    <li>Unless you share a session, send a bug report, or turn on install telemetry, the pi-rust app contacts pi-rust.com only to download the list of models. Install telemetry is off by default.</li>
+    <li>We do not sell personal information, share it for targeted advertising, or use it to train AI models.</li>
+    <li>The pi-rust app sends your prompts and code to the model providers you choose. They reach pi-rust.com only when you share a session or upload a bug report.</li>
+    <li>You can delete your shares and your account on your <a href="/account/">account pages</a>, or ask us by email.</li>
+    <li>The code that runs pi-rust.com is <a href="#source-code">open source</a>, so you can read what it does with your data.</li>
+  </ul>
+
+  <h2 id="who-we-are">Who we are</h2>
+  <p>pi-rust.com is run by <a href={AUTHOR.url} rel="author">{AUTHOR.name}</a>, the maintainer of pi-rust, as an individual from Westchester County, New York, United States. No company runs pi-rust.com. In this policy, “we” and “us” mean him. We run pi-rust.com from the United States and direct it to people in the United States.</p>
+  <p>This policy covers the website at pi-rust.com and the services that the pi-rust app uses there: accounts, session sharing, bug reports, install telemetry, and the model catalog. It does not cover the model providers you use with pi-rust, GitHub, or upstream pi at pi.dev. Their own privacy policies apply to what you send them.</p>
+  <p>This policy describes our practices. It is not a contract, and it is not part of the <a href="/terms/">Terms of Service</a>. If the privacy law of your state or country gives you more rights than this policy describes, you have those rights too.</p>
+
+  <h2 id="source-code">Source code</h2>
+  <p>The code that runs pi-rust.com is open source under the MIT license, at{' '}
+    <a href={SITE_REPO_URL} rel="noopener">{SITE_REPO_URL.replace('https://', '')}</a>. The repository shows what the website and its Worker code do. It does not show keys and other secrets, the settings of our Cloudflare account, Cloudflare’s own logs, or how the maintainer handles email.</p>
+  <p>Anyone can run their own copy of this code. This policy covers only pi-rust.com. Whoever runs a copy decides what it collects, and their own privacy policy applies. If you contribute to the repository, GitHub’s privacy statement covers what GitHub collects.</p>
+  <p>If you find that the code does something this policy does not describe, email <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.</p>
+
+  <h2 id="what-we-collect">What we collect and why</h2>
+
+  <h3 id="visits">When you visit the site</h3>
+  <p>Cloudflare hosts pi-rust.com. To deliver and protect each page, Cloudflare processes your request, including your IP address, your browser’s user agent, and the address of the page. Cloudflare keeps its own logs and request analytics under the <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare privacy policy</a>.</p>
+  <p>Our code does not store your IP address. It uses it as the key for rate limits, which count the account requests (such as sign-in), bug reports, and install pings that one address sends in 60 seconds, and for the daily count described under <a href="#model-catalog">Model catalog</a>.</p>
+  <p>Search runs in your browser. Your search terms are not sent to pi-rust.com. If a search finds nothing and you choose to search the repository on GitHub, that link sends your search terms to GitHub.</p>
+  <p>The install page remembers the platform you picked in your browser’s local storage, and that choice stays in your browser.</p>
+
+  <h3 id="accounts">When you create an account</h3>
+  <p>We use the following to sign you in, keep your account secure, and let you manage it:</p>
+  <ul>
+    <li>Your email address. We also use it to send you email about your account.</li>
+    <li>Your password, stored only as a salted hash with a secret pepper. We cannot read it.</li>
+    <li>For two-step verification, the secret of your authenticator app, stored encrypted, and your recovery codes, stored only as hashes.</li>
+    <li>For each passkey, its credential ID and public key, the model ID of the authenticator, the kind of device and how it connects, whether it is backed up, its signature counter, the name you give it, and when you added and last used it. Your device’s fingerprint or face scan never reaches us.</li>
+    <li>For each browser session, a device label such as “Chrome on macOS”, and when the session started and was last used.</li>
+    <li>For each pi CLI sign-in, the app and platform that asked, such as “pi 0.12.26 on Linux”, and when its token was created and last used. Tokens are stored only as hashes.</li>
+    <li>When you created the account and verified your address, whether you are an admin, and whether an admin suspended the account.</li>
+    <li>The version of the Terms of Service you accepted, and when.</li>
+    <li>If you change your email address, the old and the new address, and when you asked for the change. We send a link to the new address and a notice to the old one, and after the change, a link to the old address that undoes it. An hourly job deletes these records after the links expire, or sooner when the change is canceled.</li>
+  </ul>
+  <p>We send only email about your account: verification links, password resets, security alerts, such as a new passkey or a password or email address change, and notice of material changes to the Terms of Service or this policy. We do not send newsletters or marketing email.</p>
+
+  <h3 id="shares">When you share a session</h3>
+  <p>When you share a session to your pi-rust.com account, pi-rust uploads it as one HTML file. We store the file and its title, size, creation date, expiry, and visibility, and how many times it was viewed and when it was last viewed.</p>
+  <p>A shared session holds everything in that session: your prompts, the model’s replies, code, file contents, and command output. Unless you or your pi-rust settings choose otherwise, anyone with the link can open a share, and it does not expire. You can change both on your account pages. The two settings are:</p>
+  <ul>
+    <li><strong>Anyone with the link</strong> can open and download it. Chat apps that preview the link show its title.</li>
+    <li><strong>Only me</strong>: the share opens only for you, signed in to pi-rust.com. This setting controls who can open the page. It does not encrypt the file, which is stored with Cloudflare.</li>
+  </ul>
+  <p>We ask search engines not to index shares, and we ask AI crawlers not to fetch them. When someone other than you or an admin opens or downloads a share, we add one to its view count and record the time. Link previews in chat apps do not count. We store nothing about the viewer, such as an IP address or user agent.</p>
+
+  <h3 id="gist-shares">When you open a gist share</h3>
+  <p><a href="/session/">pi-rust.com/session/</a> shows a session stored in a GitHub gist. Your browser loads the gist directly from GitHub, so GitHub receives that request under the <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub privacy statement</a>. The gist ID is in the part of the address after “#”, which browsers do not send to pi-rust.com. Our code does not store the gist ID or the gist.</p>
+
+  <h3 id="bug-reports">When you send a bug report</h3>
+  <p>When you choose Upload Report in the <code>/bug</code> command, pi-rust sends us these files:</p>
+  <ul>
+    <li><code>report.json</code>: your description, the pi-rust version, your platform and terminal, the model and provider in use, your extensions, the names (not the values) of your <code>PI_</code> environment variables, and your settings with API keys, tokens, passwords, and similar values removed. When you include the session, it also has the path of the folder you ran pi-rust in.</li>
+    <li><code>diagnostics.json</code>: failed model turns and recent crashes, without conversation content.</li>
+    <li><code>session.jsonl</code>, if you include it: the full session.</li>
+    <li><code>summary.md</code>, if you include it: a summary of the session.</li>
+  </ul>
+  <p>These are the files pi-rust sends. pi-rust.com stores the files it receives and does not check them for secrets, so review a report before you upload it.</p>
+  <p>We use bug reports to find and fix bugs. A report is not linked to your account, but its contents can identify you or other people. We store the files for 90 days and list the report in the admin area. We also email the maintainer a summary and a link, with the files attached up to 15 MiB in total. The maintainer deletes that email within 90 days. If you choose Open GitHub Issue instead, you post the report on GitHub yourself, where it is public, and pi-rust.com receives nothing.</p>
+
+  <h3 id="install-telemetry">Install telemetry</h3>
+  <p>Install telemetry is off unless you turn it on with the <code>enableInstallTelemetry</code> setting or <code>PI_TELEMETRY=1</code>. When it is on, pi-rust sends a ping when it is installed or updated. We store the pi-rust version, your platform, and your architecture, for example “0.12.31, linux, x64”, whether the ping came from pi-rust, and the time. We do not store your IP address or any account or installation ID, so we cannot link a ping to you. We use pings to count installs per version and platform, and keep them for 3 months.</p>
+
+  <h3 id="model-catalog">Model catalog</h3>
+  <p>pi-rust downloads its list of models from pi-rust.com, whether or not telemetry is on. Each request carries the pi-rust version, platform, and architecture in its user agent.</p>
+  <p>To estimate how many people use pi-rust each day, we combine your IP address, platform, and architecture with a random key that changes every day (UTC), and store a one-way hash of the result with the day and your pi-rust version, platform, and architecture. These records do not contain your IP address. Within an hour after a day ends, we delete that day’s key from the database. After that, we cannot match a hash to an IP address or to your hashes on other days, except through the database’s restore history, which lasts up to 30 days and which we do not use for this. We delete the records after 90 days. The admin area shows only totals: users per day, and the share of each version and platform. We also read Cloudflare’s count of these requests, which has no IP addresses.</p>
+
+  <h3 id="email">When you email us</h3>
+  <p>If you email us, we receive your address and your message, and use them to answer you. We keep other email while we need it to answer you or follow up. We keep a privacy request, our answer, and a record of how we handled it until the request and any appeal are resolved, or longer when the law requires a record.</p>
+
+  <h2 id="how-we-use-it">How we use personal information</h2>
+  <p>We use personal information to:</p>
+  <ul>
+    <li>run the site, your account, and your shares</li>
+    <li>keep accounts secure and prevent abuse, for example with rate limits and account suspension</li>
+    <li>send email about your account</li>
+    <li>find and fix bugs</li>
+    <li>count installs, daily pi-rust users, and the versions in use, to decide what to support</li>
+    <li>meet legal obligations</li>
+  </ul>
+  <p>We do not sell, rent, or trade personal information. We do not collect, use, or sell personal information to train large language models or other AI models. We do not use it for targeted advertising, or for profiling that leads to decisions with legal or similarly significant effects on you.</p>
+
+  <h2 id="cookies">Cookies and local storage</h2>
+  <p>pi-rust.com sets two cookies, both for signing in, and the install page can keep one value in your browser’s local storage.</p>
+  <div class="table">
+    <table>
+      <thead><tr><th>Name</th><th>What it does</th><th>How long it lasts</th></tr></thead>
+      <tbody>
+        <tr><td><code>__Host-pirs_session</code></td><td>Keeps you signed in</td><td>30 days after you last use your account in the browser, or until you sign out</td></tr>
+        <tr><td><code>__Host-pirs_signin</code></td><td>Holds a password sign-in while you finish two-step verification</td><td>10 minutes</td></tr>
+        <tr><td><code>pi-rust.os</code> (local storage)</td><td>Remembers the platform you picked on the install page</td><td>Until you clear your browser data</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>When Cloudflare checks traffic for attacks, it can set its own security cookies, such as <code>__cf_bm</code> or <code>cf_clearance</code>. They are described in <a href="https://developers.cloudflare.com/fundamentals/reference/policies-compliances/cloudflare-cookies/" rel="noopener">Cloudflare’s list of cookies</a>. pi-rust.com uses no advertising or analytics cookies.</p>
+  <p>We do not track your browsing across websites, so a Do Not Track signal does not change what we do. We do not sell personal information or use it for targeted advertising, whether or not your browser sends a Global Privacy Control signal. A shared session or a gist can contain code from its author that loads content from other websites. Those websites then receive a request from your browser and may be able to recognize it over time and on other sites.</p>
+
+  <h2 id="sharing">Who we share it with</h2>
+  <p>We share personal information only with:</p>
+  <ul>
+    <li><strong>Cloudflare</strong>, which hosts the site and runs its database, file storage, email delivery, rate limits, and analytics. Cloudflare processes the data for us. Its data centers can be in or outside the United States.</li>
+    <li><strong>Google</strong>, the maintainer’s email provider, which stores the copy of each bug report that is emailed to the maintainer.</li>
+    <li><strong>People with a share link.</strong> Anyone who has the link to a share set to Anyone with the link can open it.</li>
+    <li><strong>Admins</strong>: the maintainer and the people he makes admins. They can see account email addresses, sign-up and last active dates, the titles, owners, and sizes of shares, the content of shares that anyone with the link can open, and bug reports. The admin area does not let admins open a share set to Only me or see passwords, two-step secrets, tokens, or IP addresses. The maintainer also has access to the hosting and storage systems themselves. The admin area records each change an admin makes in an activity log.</li>
+    <li><strong>Copyright claimants.</strong> When we get a valid counter notice, we send it, with its contact details, to the person who sent the original copyright notice.</li>
+    <li><strong>Legal and safety disclosures.</strong> We disclose information when the law requires or permits it, for example in response to valid legal process, in an emergency that involves danger of death or serious physical injury, in reports that federal law requires to the CyberTipline of the National Center for Missing &amp; Exploited Children, or to protect our rights and property. We disclose the content of a private share only when the law permits it.</li>
+    <li><strong>A new operator</strong>, if pi-rust.com changes hands. We require the new operator to honor this policy for the data collected under it, and we email account holders before the data moves.</li>
+  </ul>
+
+  <h2 id="retention">How long we keep it</h2>
+  <div class="table">
+    <table>
+      <thead><tr><th>Data</th><th>How long we keep it</th></tr></thead>
+      <tbody>
+        <tr><td>Account data</td><td>Until you delete the account, or an admin deletes it</td></tr>
+        <tr><td>Browser session</td><td>30 days after its last use, or until you sign out</td></tr>
+        <tr><td>pi CLI token</td><td>Until you revoke it, sign out with <code>/logout</code>, reset your password, or delete the account</td></tr>
+        <tr><td>Email links, pending sign-ins, and pi CLI sign-in requests</td><td>An hourly job deletes them after they expire. It keeps pi CLI sign-in requests one more day, so that a late request gets an expiry answer. Pending sign-ins expire after 10 minutes, pi CLI sign-in requests after 15 minutes, reset links after 30 minutes, verification links and links to confirm a new email address after 24 hours, and links that undo an email address change after 7 days.</td></tr>
+        <tr><td>Shared session</td><td>Until it expires, you delete it, or the account is deleted. An expired share is usually deleted within an hour.</td></tr>
+        <tr><td>Bug report</td><td>90 days, for the stored files and for the copy emailed to the maintainer</td></tr>
+        <tr><td>Install ping</td><td>3 months</td></tr>
+        <tr><td>Daily pi-rust user count</td><td>90 days. Each day’s key is deleted from the database within an hour after the day ends (UTC).</td></tr>
+        <tr><td>Admin activity log entry</td><td>365 days. An entry keeps the admin’s email address, the account email address, share title, or report description at the time of the action, and details such as a new role or a suspension reason, also after the account is deleted.</td></tr>
+        <tr><td>Privacy request and our answer</td><td>Until the request and any appeal are resolved, or longer when the law requires a record</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>When you delete your account, we delete its shares first and then its records in the account database. This does not delete bug reports, email, or admin activity log entries, which follow the periods above. Our database provider keeps a restore history of the account database, so deleted records stay in that history for up to 30 days. The restore history does not hold the share files.</p>
+  <p>The periods above describe normal use. We may keep a restricted copy longer when the law requires us to preserve it, or when we reasonably need it for a specific legal claim, and we delete it when that reason ends.</p>
+
+  <h2 id="your-rights">Your rights and choices</h2>
+  <p>Some state laws give their residents rights over their personal information. Anyone can make the requests below, wherever you live. We verify requests as needed, and we explain any limit on what we can provide. The law where you live may give you more rights or a shorter answer time.</p>
+  <ul>
+    <li><strong>Access.</strong> Your account pages show your email address, sessions, pi CLI tokens, passkeys, two-step settings, and every share, which you can download. To get the other personal information we can identify as yours, in a portable format such as JSON, email us. We do not send passwords, security secrets, other people’s information, or information the law requires us to withhold.</li>
+    <li><strong>Correction.</strong> Change your email address on your <a href="/account/settings/">Account page</a>. To correct anything else, email us.</li>
+    <li><strong>Deletion.</strong> Delete any share, or your whole account, on your account pages. If your account is suspended, email us. To delete a bug report before its 90 days end, email us its report ID, which pi-rust saves in your session, or the date you sent it and your pi-rust version.</li>
+    <li><strong>Opting out.</strong> We do not sell personal information or use it for targeted advertising or profiling, so there is nothing to opt out of. You can still send us an opt-out request, and we will confirm it.</li>
+    <li><strong>Install telemetry.</strong> Leave <code>enableInstallTelemetry</code> unset or <code>false</code>, and do not set <code>PI_TELEMETRY=1</code>. A ping has no ID, so we cannot find or delete a ping you sent.</li>
+    <li><strong>Model catalog.</strong> <code>PI_CATALOG_URL</code> makes pi-rust read the model list from another server. The daily count records have no account or IP address, so we cannot find yours.</li>
+    <li><strong>Equal treatment.</strong> We do not treat you differently for using any of these rights.</li>
+  </ul>
+
+  <h3 id="requests">How to make a request</h3>
+  <p>Email <a href={`mailto:${CONTACT}`}>{CONTACT}</a>, or write to the address under <a href="#contact">Contact</a>. Send it from the address on your account, or tell us which account it is about, so that we can confirm the request is yours. Someone you authorize can make a request for you with your signed permission, and we may ask you to confirm it.</p>
+  <p>Requests are free. We answer within 45 days. If we need more time, we tell you why within those 45 days and answer within 45 more.</p>
+
+  <h3 id="appeals">How to appeal</h3>
+  <p>If we decline all or part of a request, we explain why and how to appeal. To appeal, reply to our answer or email <a href={`mailto:${CONTACT}`}>{CONTACT}</a>. We answer an appeal in writing within 45 days, or sooner if the law requires, and explain our decision. If we deny the appeal, we tell you how to contact the attorney general or other regulator of your state. New York residents can <a href="https://ag.ny.gov/file-complaint" rel="noopener">file a complaint with the New York Attorney General</a>.</p>
+
+  <h2 id="security">Security</h2>
+  <p>We keep administrative, technical, and physical safeguards for personal information. They include:</p>
+  <ul>
+    <li>The site works only over HTTPS.</li>
+    <li>Passwords are stored as salted hashes with a secret pepper. Two-step secrets are encrypted. Recovery codes, tokens, and email links are stored only as hashes.</li>
+    <li>You can turn on two-step verification and add passkeys. Admins must have one of the two to open the admin area.</li>
+    <li>Rate limits slow down password guessing and other abuse.</li>
+    <li>A shared session runs in a sandbox that cannot read pi-rust.com cookies or use your account.</li>
+    <li>Cloudflare protects the data centers that hold the data.</li>
+  </ul>
+  <p>No way of storing or sending data over the internet is completely secure, so we cannot guarantee that these safeguards will stop every attack.</p>
+  <p>If a breach requires notice, we notify the affected people and the authorities by the methods and within the time that the applicable law requires. For affected New York residents, we give the required notice without unreasonable delay and within 30 days after we discover the breach, unless the law allows a delay. To report a security problem, email <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.</p>
+
+  <h2 id="children">Children</h2>
+  <p>pi-rust.com is for adults and is not directed to children. Do not use the services or send us information if you are under 18. We do not knowingly collect personal information from anyone under 18. If you believe a minor used the services, email <a href={`mailto:${CONTACT}`}>{CONTACT}</a>, and identify the account, share, or report if you can. Do not send a copy of a child’s ID or of harmful content. If we learn that a user is under 18, we stop providing the services to that user and delete the personal information of that user that we can identify, except where the law requires or permits us to keep it for a specific legal or safety purpose.</p>
+
+  <h2 id="state-notices">State notices</h2>
+  <p><strong>California.</strong> We do not sell or share personal information, as the California Consumer Privacy Act defines those words. We use your account credentials only to sign you in and keep your account secure. If you include sensitive information in a session, a report, or a message, we handle it with that content for the purposes described above. We do not disclose personal information to third parties for their direct marketing. The categories of personal information we collect are identifiers, such as your email address; internet activity, such as the requests Cloudflare processes and the view counts of your shares; and the content of the sessions and bug reports you send us. We collect them from you, your browser, and the pi-rust app.</p>
+  <p><strong>Nevada.</strong> We do not sell covered information. You can still send an opt-out request to <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.</p>
+  <p><strong>New York.</strong> We protect private information and notify you of a breach as the New York SHIELD Act requires; see <a href="#security">Security</a>. Our age rule, and how to tell us that a minor used the services, are under <a href="#children">Children</a>.</p>
+
+  <h2 id="outside-us">Users in the EEA, the UK, and Switzerland</h2>
+  <p>We do not direct pi-rust.com to people in the European Economic Area, the United Kingdom, or Switzerland. If and to the extent that the GDPR, the UK GDPR, or the Swiss Federal Act on Data Protection applies to how we process your personal data, this section applies too. This section does not concede that those laws apply.</p>
+  <p><strong>Controller.</strong> {OPERATOR.name} is the controller of your personal data, at the addresses under <a href="#contact">Contact</a>. We have not appointed a representative in the EU or the UK. You can contact us directly at <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.</p>
+  <p><strong>Legal bases.</strong> We rely on:</p>
+  <ul>
+    <li><strong>Contract</strong> (GDPR Article 6(1)(b)), to open and secure the account you ask for, host the shares you choose to share, and send you email about your account. We need your email address and a password to create an account, and cannot create one without them. You do not need to give us anything to read the public pages.</li>
+    <li><strong>Legitimate interests</strong> (Article 6(1)(f)), to deliver the site, protect it against abuse, moderate uploads, keep records of moderation and of acceptance of the Terms of Service, answer messages, find and fix bugs from the reports you send, estimate how many people use pi-rust, and bring or defend legal claims. We rely on these interests only where your interests and rights do not override them.</li>
+    <li><strong>Consent</strong> (Article 6(1)(a)), for install telemetry, which is off unless you turn it on. You can turn it off at any time. This does not affect what we did before you turned it off.</li>
+    <li><strong>Legal obligation</strong> (Article 6(1)(c)), where a law of the EU, of a member state, or of the UK, as applicable, requires us to use your data.</li>
+  </ul>
+  <p><strong>Data we get from others.</strong> A share, a bug report, or a message that someone else sends us can contain your name, contact details, code, messages, or other information about you. We get that information from the sender, and use it for the purposes described for that feature.</p>
+  <p><strong>Your rights.</strong> You can ask to access, correct, or delete your personal data, to get a copy in a portable format, and to restrict how we use it. Make the request as <a href="#requests">How to make a request</a> describes. For an EU or UK request, we answer without undue delay and normally within one month. If the number or complexity of requests makes it necessary, we can take up to two more months, and we tell you why within the first month. For a Swiss access request, we answer within 30 days, or tell you within those 30 days when to expect the answer.</p>
+  <p><strong>Your right to object.</strong> You can object, on grounds that relate to your situation, to processing based on legitimate interests. We then stop, unless we have compelling grounds to continue that override your interests, or we need the data for a legal claim.</p>
+  <p><strong>Complaints.</strong> You can complain to us at <a href={`mailto:${CONTACT}`}>{CONTACT}</a>. If UK law applies, we acknowledge a complaint within 30 days, look into it, keep you informed, and tell you the outcome without undue delay. You can also complain to a data protection authority: in the EEA, to a{' '}
+    <a href="https://www.edpb.europa.eu/about-edpb/our-members_en" rel="noopener">member of the European Data Protection Board</a> where you live, where you work, or where the alleged violation took place; in the UK, to the{' '}
+    <a href="https://ico.org.uk/make-a-complaint/" rel="noopener">Information Commissioner’s Office</a>; in Switzerland, to the{' '}
+    <a href="https://www.edoeb.admin.ch/en" rel="noopener">Federal Data Protection and Information Commissioner</a>.</p>
+  <p><strong>Transfers.</strong> We process personal data in the United States, and Cloudflare’s data centers can be in other countries too. Cloudflare participates in the EU-U.S. Data Privacy Framework, its UK Extension, and the Swiss-U.S. Data Privacy Framework, and its{' '}
+    <a href="https://www.cloudflare.com/cloudflare-customer-dpa/" rel="noopener">data processing addendum</a> includes the standard contractual clauses, with the UK and Swiss changes, for transfers to Cloudflare. Google, the maintainer’s email provider, receives bug report emails in the United States and participates in the same three frameworks. Email <a href={`mailto:${CONTACT}`}>{CONTACT}</a> for a copy of the safeguards that apply to your data.</p>
+
+  <h2 id="changes">Changes to this policy</h2>
+  <p>We post every change on this page and update the effective date at the top. Before we use personal information we already hold in a materially different way, we email the affected account holders and take reasonable steps to tell other affected people, and we get consent first when the law requires it.</p>
+
+  <h2 id="contact">Contact</h2>
+  <p>Email <a href={`mailto:${CONTACT}`}>{CONTACT}</a> with any question about this policy or your personal information, or write to:</p>
+  <address class="privacy-address">
+    {OPERATOR.name}<br />
+    {OPERATOR.street}<br />
+    {OPERATOR.city}<br />
+    United States
+  </address>
+</Docs>
+
+<style>
+  .privacy-address {
+    max-width: var(--measure);
+    font-style: normal;
+  }
+
+  .privacy-date {
+    max-width: var(--measure);
+    margin-top: 20px;
+    color: var(--graphite);
+    font-size: var(--t-14);
+  }
+</style>

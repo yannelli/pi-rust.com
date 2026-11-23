@@ -1,0 +1,66 @@
+---
+import Docs from '../../layouts/Docs.astro';
+import { docHref, docsNav } from '../../lib/docs';
+
+const nav = await docsNav();
+const description =
+  'How to install pi-rust, run pi, connect models, editors, and MCP servers, and write extensions. The docs match the latest pi-rust release.';
+---
+
+<Docs title="pi-rust documentation" description={description} group="Overview" headings={[]} image="/og/docs.png">
+  <div class="overview">
+    {nav.map(({ name, docs }) => (
+      <section aria-labelledby={`group-${name}`}>
+        <h2 id={`group-${name}`}>{name}</h2>
+        <ul>
+          {docs.map((doc) => (
+            <li>
+              <a href={docHref(doc)}>{doc.data.title}</a>
+              <p>{doc.data.description}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</Docs>
+
+<style>
+  .overview section + section {
+    margin-top: 40px;
+  }
+
+  .overview h2 {
+    margin-top: 0;
+  }
+
+  .overview ul {
+    margin-top: 12px;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .overview li {
+    padding-block: 14px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .overview li + li {
+    margin-top: 0;
+  }
+
+  .overview a {
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .overview a:hover {
+    text-decoration: underline;
+  }
+
+  .overview p {
+    margin-top: 4px;
+    font-size: var(--t-14);
+  }
+</style>

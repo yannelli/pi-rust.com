@@ -1,0 +1,70 @@
+---
+import Admin from '../../layouts/Admin.astro';
+
+const STATS = [
+  { id: 'accounts', label: 'Accounts', href: '/admin/people/' },
+  { id: 'shares', label: 'Shares', href: '/admin/shares/' },
+  { id: 'reports', label: 'Open bug reports', href: '/admin/bug-reports/' },
+  { id: 'installs', label: 'Installs and updates', href: '#installs' },
+];
+---
+
+<Admin title="Overview" active="overview" description="Accounts, shared sessions, bug reports, and installs on pi-rust.com.">
+  <div class="stats" aria-busy="true" data-stats>
+    {STATS.map(({ id, label, href }) => (
+      <a class="stat" href={href}>
+        <span class="stat__label">{label}</span>
+        <span class="stat__value" data-stat={id}></span>
+        <span class="stat__note" data-stat-note={id}></span>
+      </a>
+    ))}
+  </div>
+
+  <section class="block" id="versions" aria-labelledby="versions-title">
+    <div class="block__head">
+      <h2 id="versions-title">pi-rust in use</h2>
+      <p>Unique users per day, from model catalog requests</p>
+    </div>
+    <div class="surface" data-versions>
+      <p class="empty"><span>Loading users.</span></p>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="days-title">
+    <div class="block__head">
+      <h2 id="days-title">Last 30 days</h2>
+      <p>Per day, in UTC</p>
+    </div>
+    <div class="surface surface--pad">
+      <div class="charts">
+        <div class="chart" data-chart="signUps" data-label="New accounts"></div>
+        <div class="chart" data-chart="shares" data-label="New shares"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="columns">
+    <section class="block" aria-labelledby="accounts-title">
+      <div class="block__head"><h2 id="accounts-title">Accounts</h2></div>
+      <div class="surface"><ul class="facts-list" data-facts="accounts"></ul></div>
+    </section>
+    <section class="block" aria-labelledby="shares-title">
+      <div class="block__head"><h2 id="shares-title">Shares</h2></div>
+      <div class="surface"><ul class="facts-list" data-facts="shares"></ul></div>
+    </section>
+  </div>
+
+  <section class="block" id="installs" aria-labelledby="installs-title">
+    <div class="block__head">
+      <h2 id="installs-title">Installs and updates</h2>
+      <p>Opt-in pings from pi-rust, last 30 days</p>
+    </div>
+    <div class="surface" data-installs>
+      <p class="empty"><span>Loading install stats.</span></p>
+    </div>
+  </section>
+</Admin>
+
+<script>
+  import '../../scripts/admin/overview.ts';
+</script>

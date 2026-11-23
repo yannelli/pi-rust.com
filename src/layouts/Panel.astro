@@ -1,0 +1,45 @@
+---
+/**
+ * The signed-in account pages: Shares, Security, and Account. The Worker sends signed-out
+ * visitors to sign-in before this page loads. Never indexed.
+ */
+import '../styles/account.css';
+import Base from './Base.astro';
+import Dialogs from '../components/account/Dialogs.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  active: 'shares' | 'security' | 'settings';
+}
+
+const { title, description, active } = Astro.props;
+
+const NAV = [
+  { id: 'shares', label: 'Shares', href: '/account/' },
+  { id: 'security', label: 'Security', href: '/account/security/' },
+  { id: 'settings', label: 'Account', href: '/account/settings/' },
+] as const;
+---
+
+<Base title={title} description={description} noindex>
+  <div class="panel page">
+    <div class="panel__head">
+      <div>
+        <h1>{title}</h1>
+        <p class="panel__who" data-account-email></p>
+      </div>
+      <button class="btn btn--secondary btn--small" type="button" data-sign-out>Sign out</button>
+    </div>
+    <nav class="panel__nav" aria-label="Account">
+      {NAV.map((item) => (
+        <a href={item.href} aria-current={item.id === active ? 'page' : undefined}>{item.label}</a>
+      ))}
+      <a href="/admin/" data-admin-link hidden>Admin</a>
+    </nav>
+    <div class="panel__main">
+      <slot />
+    </div>
+  </div>
+  <Dialogs />
+</Base>

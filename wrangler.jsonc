@@ -1,0 +1,86 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pi-rust-com",
+  "account_id": "d16cb1cae3f9e3483ffb7a5f014cd8f9",
+  "compatibility_date": "2026-11-01",
+  // Serves /install.sh and /install.ps1 from the pi-rust repository, receives
+  // /bug reports at /v1/bug-reports and install pings at /api/report-install,
+  // serves the model catalog at /api/models/providers/<id> from the pi-rust
+  // model-catalog branch, runs accounts and session sharing (docs/accounts.md,
+  // docs/sharing.md) with an hourly cleanup and the admin area (docs/admin.md),
+  // and hands everything else to dist/.
+  "main": "worker/index.ts",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": [
+      "/install.sh",
+      "/install.ps1",
+      "/v1/bug-reports",
+      "/api/report-install",
+      "/api/models/*",
+      "/api/account/*",
+      "/api/admin/*",
+      "/oauth/*",
+      "/v1/account",
+      "/v1/token",
+      "/v1/shares",
+      "/v1/shares/*",
+      "/s/*",
+      "/account",
+      "/account/*",
+      "/admin",
+      "/admin/*",
+      "/device",
+      "/device/*",
+      "/session",
+      "/session/*",
+      "/__dev/*"
+    ]
+  },
+  // Accounts, sessions, passkeys, CLI tokens, share records, the bug report list, admin activity, and the
+  // daily pi-rust client count.
+  // See docs/accounts.md and docs/admin.md.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pi-rust-accounts",
+      "database_id": "bb4a6f77-06e5-4356-96c8-9efa38dda47e",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // /v1/bug-reports: files in R2, email from BUG_REPORT_FROM to the BUG_REPORT_TO secret.
+  // /v1/shares: the HTML of each shared session, served at /s/<id>.
+  "r2_buckets": [
+    { "binding": "BUG_REPORTS", "bucket_name": "pi-rust-bug-reports" },
+    { "binding": "SHARES", "bucket_name": "pi-rust-shares" }
+  ],
+  // EMAIL sends account email to any address, so pi-rust.com must be onboarded to Email Sending.
+  "send_email": [
+    { "name": "BUG_EMAIL", "allowed_sender_addresses": ["bugs@pi-rust.com"] },
+    { "name": "EMAIL", "allowed_sender_addresses": ["accounts@pi-rust.com"] }
+  ],
+  // /api/report-install: one data point per opt-in install ping; see docs/install-telemetry.md.
+  "analytics_engine_datasets": [{ "binding": "INSTALL_TELEMETRY", "dataset": "pi_rust_install_telemetry" }],
+  "ratelimits": [
+    { "name": "BUG_REPORT_LIMITER", "namespace_id": "4101", "simple": { "limit": 5, "period": 60 } },
+    { "name": "INSTALL_TELEMETRY_LIMITER", "namespace_id": "4102", "simple": { "limit": 10, "period": 60 } },
+    // Sign-in, sign-up, reset, verify, two-step, and device endpoints, per client IP and route class.
+    { "name": "AUTH_LIMITER", "namespace_id": "4103", "simple": { "limit": 10, "period": 60 } },
+    // Share uploads, per CLI token.
+    { "name": "SHARE_LIMITER", "namespace_id": "4104", "simple": { "limit": 10, "period": 60 } }
+  ],
+  // Hourly at :17: deletes expired shares and expired sign-in rows (worker/cleanup.ts).
+  "triggers": { "crons": ["17 * * * *"] },
+  // Secrets, set with `wrangler secret put`: BUG_REPORT_TO, AUTH_PEPPER, TOTP_ENCRYPTION_KEY, and the optional
+  // CLOUDFLARE_ANALYTICS_TOKEN (Account Analytics Read, and Analytics Read on the pi-rust.com zone) that shows
+  // install stats and the versions in use in the admin area.
+  "vars": {
+    "BUG_REPORT_FROM": "bugs@pi-rust.com",
+    "ACCOUNT_EMAIL_FROM": "accounts@pi-rust.com",
+    "CLOUDFLARE_ACCOUNT_ID": "d16cb1cae3f9e3483ffb7a5f014cd8f9",
+    "CLOUDFLARE_ZONE_ID": "e9d2ecf50316833b1d4a5cba8f3bc716"
+  },
+  "routes": [{ "pattern": "pi-rust.com", "custom_domain": true }]
+}

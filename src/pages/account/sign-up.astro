@@ -1,0 +1,82 @@
+---
+import Auth from '../../layouts/Auth.astro';
+import { TERMS_VERSION } from '../../lib/legal';
+---
+
+<Auth title="Create account" description="Create a pi-rust account to share sessions from the pi CLI.">
+  <section data-step="email">
+    <h1>Create account</h1>
+    <p class="card__lead">Enter your email</p>
+    <form class="form" method="dialog" novalidate data-email-form>
+      <div class="field">
+        <label for="email">Email</label>
+        <input class="input" id="email" name="email" type="email" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="email-error" required autofocus />
+        <p class="field__error" id="email-error" role="alert"></p>
+      </div>
+      <div class="actions">
+        <a class="link-button" href="/account/sign-in/" data-keep-next>Sign in instead</a>
+        <button class="btn btn--primary" type="submit">Next</button>
+      </div>
+    </form>
+  </section>
+
+  <section data-step="password" hidden>
+    <h1>Create a password</h1>
+    <button class="chip" type="button" data-back-to-email aria-label="Change email"><span data-email-chip></span></button>
+    <form class="form" method="dialog" novalidate data-password-form data-terms-version={TERMS_VERSION}>
+      <input class="sr-only" name="username" type="email" autocomplete="username" tabindex="-1" aria-hidden="true" readonly />
+      <div class="field">
+        <label for="password">Password</label>
+        <input class="input" id="password" name="password" type="password" autocomplete="new-password" minlength="10" maxlength="256" aria-describedby="password-hint password-error" required />
+        <p class="field__hint" id="password-hint">Use 10 or more characters.</p>
+        <p class="field__error" id="password-error" role="alert"></p>
+      </div>
+      <label class="check"><input type="checkbox" data-show-password /> Show password</label>
+      <div class="field">
+        <label class="check terms">
+          <input type="checkbox" name="acceptTerms" aria-describedby="terms-error" required />
+          <span>
+            I am 18 or older, and I agree to the <a href="/terms/" target="_blank">Terms of Service</a>. I have read the{' '}
+            <a href="/privacy/" target="_blank">Privacy Policy</a>.
+          </span>
+        </label>
+        <p class="field__error" id="terms-error" role="alert"></p>
+      </div>
+      <p class="notice notice--error" role="alert" data-form-error></p>
+      <div class="actions">
+        <button class="link-button" type="button" data-back-to-email>Back</button>
+        <button class="btn btn--primary" type="submit">Create account</button>
+      </div>
+    </form>
+  </section>
+
+  <section data-step="sent" hidden>
+    <h1 data-focus>Check your email</h1>
+    <p class="card__lead">We sent a message to <strong data-sent-to></strong>. Open the link in it to continue.</p>
+    <div class="actions actions--end">
+      <a class="btn btn--primary" href="/account/sign-in/" data-keep-next>Sign in</a>
+    </div>
+  </section>
+</Auth>
+
+<script>
+  import '../../scripts/account/sign-up.ts';
+</script>
+
+<style>
+  /* The label wraps onto several lines, so the box sits beside its first line. */
+  .terms {
+    align-items: flex-start;
+    line-height: 1.45;
+  }
+
+  .terms input {
+    flex: none;
+    margin-top: 2px;
+  }
+
+  .terms a {
+    color: var(--ink);
+    text-underline-offset: 0.2em;
+  }
+</style>

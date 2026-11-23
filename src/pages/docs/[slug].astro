@@ -1,0 +1,28 @@
+---
+import Markdown from '../../components/Markdown.astro';
+import { render } from 'astro:content';
+import Docs from '../../layouts/Docs.astro';
+import { docsInOrder, type Doc } from '../../lib/docs';
+
+export async function getStaticPaths() {
+  const docs = await docsInOrder();
+  // Install has its own page at /install/.
+  return docs.filter((doc) => doc.id !== 'install').map((doc) => ({ params: { slug: doc.id }, props: { doc } }));
+}
+
+const { doc } = Astro.props as { doc: Doc };
+const { Content, headings } = await render(doc);
+---
+
+<Docs
+  title={doc.data.title}
+  description={doc.data.description}
+  group={doc.data.group}
+  source={doc.data.source}
+  sourceRef={doc.data.ref}
+  lead={doc.data.lead}
+  headings={headings}
+  image={`/og/docs-${doc.id}.png`}
+>
+  <Markdown entry={doc}><Content /></Markdown>
+</Docs>

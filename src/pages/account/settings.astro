@@ -1,0 +1,57 @@
+---
+import Panel from '../../layouts/Panel.astro';
+import VerifyBanner from '../../components/account/VerifyBanner.astro';
+---
+
+<Panel title="Account" active="settings" description="The email address of your pi-rust account, and account deletion.">
+  <VerifyBanner />
+  <section class="section" aria-labelledby="email-title">
+    <div class="section__body">
+      <div class="section__title">
+        <h2 id="email-title">Email</h2>
+        <span class="badge" data-email-badge></span>
+      </div>
+      <p class="section__desc" data-email></p>
+      <div class="notice notice--pending" data-email-pending hidden>
+        <p>Open the link sent to <strong data-pending-email></strong> to finish the change. Until then, you sign in with your current address.</p>
+        <button class="link-button" type="button" data-cancel-change>Cancel the change</button>
+      </div>
+    </div>
+    <div class="section__foot">
+      <span data-created></span>
+      <button class="btn btn--secondary btn--small" type="button" data-change-email>Change email</button>
+    </div>
+  </section>
+
+  <section class="section section--danger" aria-labelledby="delete-title">
+    <div class="section__body">
+      <h2 id="delete-title">Delete account</h2>
+      <p class="section__desc">Deletes your account, your shared sessions, your passkeys, and your CLI tokens. Shared links stop working. This can’t be undone.</p>
+    </div>
+    <div class="section__foot">
+      <span></span>
+      <button class="btn btn--danger-solid btn--small" type="button" data-delete>Delete account</button>
+    </div>
+  </section>
+  <dialog class="dialog" data-change-dialog aria-labelledby="change-email-title" aria-describedby="change-email-text">
+    <form method="dialog" novalidate data-change-form>
+      <div class="dialog__body">
+        <h2 id="change-email-title">Change email</h2>
+        <p id="change-email-text">A link goes to the new address. Your email changes when you open it, and your current address gets a notice.</p>
+        <div class="field">
+          <label for="new-email">New email</label>
+          <input class="input" id="new-email" name="email" type="email" autocomplete="email" inputmode="email" spellcheck="false" aria-describedby="new-email-error" required />
+          <p class="field__error" id="new-email-error" role="alert"></p>
+        </div>
+      </div>
+      <div class="dialog__foot">
+        <button class="btn btn--secondary" type="button" data-change-cancel>Cancel</button>
+        <button class="btn btn--primary" type="submit">Send link</button>
+      </div>
+    </form>
+  </dialog>
+</Panel>
+
+<script>
+  import '../../scripts/account/settings.ts';
+</script>

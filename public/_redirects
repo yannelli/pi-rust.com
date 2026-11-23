@@ -1,0 +1,5 @@
+# Short paths people type.
+/github https://github.com/yannelli/pi-rust 302
+/releases https://github.com/yannelli/pi-rust/releases 302
+
+# Bare page paths to their trailing-slash URLs, written at build time.

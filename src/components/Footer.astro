@@ -1,0 +1,142 @@
+---
+import Logo from './Logo.astro';
+import { AUTHOR, RELEASE, RELEASES_URL, REPO_URL, UPSTREAM_PI_URL, formatDate } from '../lib/site';
+
+const year = new Date().getUTCFullYear();
+---
+
+<footer class="footer">
+  <div class="page footer__grid">
+    <div class="footer__about">
+      <a class="footer__brand" href="/"><Logo size={20} /><span>pi-rust</span></a>
+      <p>The pi coding agent, ported to Rust. MIT licensed.</p>
+      <p class="footer__release">
+        Latest release <a href={RELEASE.url} rel="noopener">{RELEASE.tag}</a>, {formatDate(RELEASE.date)}
+      </p>
+    </div>
+
+    <nav class="footer__links" aria-label="Documentation">
+      <h2>Docs</h2>
+      <a href="/docs/quick-start/">Quick start</a>
+      <a href="/install/">Install</a>
+      <a href="/docs/providers/">Providers</a>
+      <a href="/docs/commands/">Interactive commands</a>
+      <a href="/docs/differences/">Differences from pi</a>
+    </nav>
+
+    <nav class="footer__links" aria-label="Project">
+      <h2>Project</h2>
+      <a href={REPO_URL} rel="noopener">Source on GitHub</a>
+      <a href={RELEASES_URL} rel="noopener">Releases</a>
+      <a href="/changelog/">Changelog</a>
+      <a href="/benchmarks/">Benchmarks</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="/account/">Your account</a>
+    </nav>
+
+    <div class="footer__credit">
+      <h2>Made by</h2>
+      <p><a href={AUTHOR.url} rel="author">{AUTHOR.name}</a></p>
+      <p><a href={AUTHOR.projectUrl}>About pi-rust on ryanyannelli.com</a></p>
+      <p>A Rust rewrite of <a href={UPSTREAM_PI_URL} rel="noopener">pi</a></p>
+    </div>
+  </div>
+  <div class="page footer__base">
+    <p>© {year} <a href={AUTHOR.url} rel="author">{AUTHOR.name}</a></p>
+    <p class="footer__legal"><a href="/terms/">Terms of service</a><a href="/privacy/">Privacy policy</a></p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: clamp(64px, 10vw, 120px);
+    border-top: 1px solid var(--hairline);
+    background: var(--surface);
+    font-size: var(--t-14);
+    color: var(--graphite);
+  }
+
+  .footer__grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 1.5fr;
+    gap: 40px;
+    padding-block: 56px 40px;
+  }
+
+  .footer h2 {
+    margin-bottom: 12px;
+    color: var(--ink);
+    font-size: var(--t-14);
+    font-weight: 500;
+  }
+
+  .footer__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .footer__about p + p {
+    margin-top: 6px;
+  }
+
+  .footer__release {
+    color: var(--muted);
+  }
+
+  .footer__links {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+  }
+
+  .footer a {
+    text-decoration-color: var(--hairline-strong);
+    text-underline-offset: 0.2em;
+  }
+
+  .footer__links a {
+    text-decoration: none;
+  }
+
+  .footer a:hover {
+    color: var(--ink);
+  }
+
+  .footer__credit p + p {
+    margin-top: 8px;
+  }
+
+  .footer__base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+    padding-block: 20px 28px;
+    border-top: 1px solid var(--hairline);
+    color: var(--muted);
+    font-size: var(--t-13);
+  }
+
+  .footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+  }
+
+  @media (max-width: 860px) {
+    .footer__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .footer__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,386 @@
+---
+import type { MarkdownHeading } from 'astro';
+import Base from './Base.astro';
+import { docHref, docsInOrder, docsNav } from '../lib/docs';
+import { breadcrumbs, techArticle } from '../lib/seo';
+import { RELEASE, REPO_URL } from '../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  group: string;
+  /** The file in yannelli/pi-rust the page comes from. */
+  source?: string;
+  /** The ref the file was read at; defaults to the release tag. */
+  sourceRef?: string;
+  lead?: boolean;
+  headings: MarkdownHeading[];
+  image: string;
+  /** Extra JSON-LD for the page, such as FAQPage. */
+  schema?: Record<string, unknown>[];
+}
+
+const { title, description, group, source, sourceRef = RELEASE.tag, lead = true, headings, image, schema = [] } = Astro.props;
+const path = Astro.url.pathname;
+
+const nav = await docsNav();
+const ordered = await docsInOrder();
+const index = ordered.findIndex((doc) => docHref(doc) === path);
+const previous = index > 0 ? ordered[index - 1] : undefined;
+const next = index >= 0 && index < ordered.length - 1 ? ordered[index + 1] : undefined;
+
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+const pageSchema = [
+  techArticle({ title, description, path, image }),
+  breadcrumbs([
+    { name: 'pi-rust', path: '/' },
+    { name: 'Docs', path: '/docs/' },
+    { name: title, path },
+  ]),
+  ...schema,
+];
+---
+
+<Base title={title} description={description} image={image} type="article" schema={pageSchema}>
+  <div class="docs page">
+    <aside class="docs__nav" aria-label="Docs" data-pagefind-ignore>
+      <details class="docs__menu" open>
+        <summary>Docs menu</summary>
+        <nav aria-label="Docs sections">
+          <a class="docs__home" href="/docs/" aria-current={path === '/docs/' ? 'page' : undefined}>Overview</a>
+          {nav.map(({ name, docs }) => (
+            <div class="docs__group">
+              <h2>{name}</h2>
+              <ul>
+                {docs.map((doc) => (
+                  <li>
+                    <a href={docHref(doc)} aria-current={docHref(doc) === path ? 'page' : undefined}>{doc.data.title}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          <div class="docs__group">
+            <h2>More</h2>
+            <ul>
+              <li><a href="/benchmarks/" aria-current={path === '/benchmarks/' ? 'page' : undefined}>Benchmarks</a></li>
+              <li><a href="/changelog/" aria-current={path === '/changelog/' ? 'page' : undefined}>Changelog</a></li>
+              <li><a href="/faq/" aria-current={path === '/faq/' ? 'page' : undefined}>FAQ</a></li>
+            </ul>
+          </div>
+        </nav>
+      </details>
+    </aside>
+
+    <article class="docs__main">
+      <nav class="docs__crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/docs/">Docs</a></li>
+          <li aria-current="page">{group}</li>
+        </ol>
+      </nav>
+      <h1 class="docs__title">{title}</h1>
+      {lead && <p class="docs__lead">{description}</p>}
+      <slot name="before" />
+      <div class="prose docs__body">
+        <slot />
+      </div>
+
+      <footer class="docs__foot" data-pagefind-ignore>
+        {source && (
+          <p class="docs__source">
+            This page comes from <a href={`${REPO_URL}/blob/${sourceRef}/${source}`} rel="noopener"><code>{source}</code></a> in
+            pi-rust {sourceRef === RELEASE.tag ? RELEASE.tag : `${RELEASE.tag}, with later docs fixes`}.
+          </p>
+        )}
+        {(previous || next) && (
+          <nav class="docs__pager" aria-label="Previous and next page">
+            {previous ? (
+              <a href={docHref(previous)} rel="prev"><span>Previous</span>{previous.data.title}</a>
+            ) : <span />}
+            {next && (
+              <a class="docs__next" href={docHref(next)} rel="next"><span>Next</span>{next.data.title}</a>
+            )}
+          </nav>
+        )}
+      </footer>
+    </article>
+
+    <aside class="docs__toc" aria-label="On this page" data-pagefind-ignore>
+      {toc.length > 1 && (
+        <>
+          <h2>On this page</h2>
+          <ul>
+            {toc.map((h) => (
+              <li class={`docs__toc-${h.depth}`}><a href={`#${h.slug}`} data-toc-link>{h.text}</a></li>
+            ))}
+          </ul>
+        </>
+      )}
+    </aside>
+  </div>
+</Base>
+
+<script>
+  // Marks the section in view in the "On this page" list.
+  const links = new Map<string, HTMLAnchorElement>();
+  document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]').forEach((a) => links.set(a.hash.slice(1), a));
+  const headings = [...document.querySelectorAll<HTMLElement>('.docs__body :is(h2, h3)[id]')].filter((h) => links.has(h.id));
+  if (headings.length) {
+    let current = '';
+    const update = () => {
+      const top = 96;
+      let id = headings[0].id;
+      for (const h of headings) {
+        if (h.getBoundingClientRect().top - top <= 0) id = h.id;
+        else break;
+      }
+      if (id === current) return;
+      links.get(current)?.removeAttribute('aria-current');
+      links.get(id)?.setAttribute('aria-current', 'true');
+      current = id;
+    };
+    document.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
+  // On narrow screens the docs menu starts closed.
+  const menu = document.querySelector<HTMLDetailsElement>('.docs__menu');
+  if (menu && matchMedia('(max-width: 900px)').matches) menu.open = false;
+</script>
+
+<style>
+  .docs {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr) 200px;
+    gap: 48px;
+    align-items: start;
+    padding-top: 40px;
+  }
+
+  .docs__nav,
+  .docs__toc {
+    position: sticky;
+    top: calc(var(--header) + 24px);
+    max-height: calc(100dvh - var(--header) - 48px);
+    overflow-y: auto;
+    font-size: var(--t-14);
+    scrollbar-width: thin;
+  }
+
+  .docs__menu summary {
+    display: none;
+  }
+
+  .docs__home {
+    display: block;
+    margin-bottom: 18px;
+  }
+
+  .docs__group + .docs__group {
+    margin-top: 22px;
+  }
+
+  .docs__group h2,
+  .docs__toc h2 {
+    margin-bottom: 8px;
+    color: var(--ink);
+    font-size: var(--t-13);
+    font-weight: 600;
+  }
+
+  .docs__nav ul,
+  .docs__toc ul {
+    display: grid;
+    gap: 2px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .docs__nav a {
+    display: block;
+    padding: 5px 10px;
+    margin-left: -10px;
+    border-radius: var(--r-sm);
+    color: var(--graphite);
+    line-height: 1.4;
+    text-decoration: none;
+  }
+
+  .docs__nav a:hover {
+    background: var(--hover);
+    color: var(--ink);
+  }
+
+  .docs__nav a[aria-current='page'] {
+    background: var(--hover);
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .docs__toc a {
+    display: block;
+    padding: 4px 0 4px 12px;
+    border-left: 1px solid var(--hairline);
+    color: var(--muted);
+    line-height: 1.4;
+    text-decoration: none;
+  }
+
+  .docs__toc-3 a {
+    padding-left: 24px;
+  }
+
+  .docs__toc a:hover {
+    color: var(--ink);
+  }
+
+  .docs__toc a[aria-current='true'] {
+    border-left-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .docs__main {
+    min-width: 0;
+    max-width: 760px;
+  }
+
+  .docs__crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0;
+    list-style: none;
+    color: var(--muted);
+    font-size: var(--t-13);
+  }
+
+  .docs__crumbs li + li::before {
+    content: '/';
+    margin-right: 6px;
+    color: var(--hairline-strong);
+  }
+
+  .docs__crumbs a {
+    text-decoration: none;
+  }
+
+  .docs__crumbs a:hover {
+    color: var(--ink);
+  }
+
+  .docs__title {
+    margin-top: 14px;
+    font-size: clamp(var(--t-32), 4vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .docs__lead {
+    max-width: var(--measure);
+    margin-top: 14px;
+    color: var(--graphite);
+    font-size: var(--t-18);
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  .docs__body {
+    margin-top: 32px;
+  }
+
+  .docs__foot {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .docs__source {
+    color: var(--muted);
+    font-size: var(--t-14);
+  }
+
+  .docs__source a {
+    color: var(--graphite);
+  }
+
+  .docs__source code {
+    font-size: 0.92em;
+  }
+
+  .docs__pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 28px;
+  }
+
+  .docs__pager a {
+    display: grid;
+    gap: 2px;
+    padding: 14px 18px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    background: var(--surface);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .docs__pager a:hover {
+    border-color: var(--hairline-strong);
+  }
+
+  .docs__pager span {
+    color: var(--muted);
+    font-size: var(--t-13);
+    font-weight: 400;
+  }
+
+  .docs__next {
+    text-align: right;
+  }
+
+  @media (max-width: 1180px) {
+    .docs {
+      grid-template-columns: 200px minmax(0, 1fr);
+    }
+
+    .docs__toc {
+      display: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .docs {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+      padding-top: 20px;
+    }
+
+    .docs__nav {
+      position: static;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .docs__menu {
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      background: var(--surface);
+    }
+
+    .docs__menu summary {
+      display: block;
+      padding: 12px 16px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .docs__menu nav {
+      padding: 4px 16px 16px 26px;
+    }
+  }
+</style>

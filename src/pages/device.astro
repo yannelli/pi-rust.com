@@ -1,0 +1,67 @@
+---
+import Auth from '../layouts/Auth.astro';
+---
+
+<Auth title="Connect the pi CLI" description="Approve a pi CLI sign-in to your pi-rust account.">
+  <section data-step="loading">
+    <h1>Connect the pi CLI</h1>
+    <p class="card__lead">Checking the code.</p>
+  </section>
+
+  <section data-step="enter" hidden>
+    <h1>Connect the pi CLI</h1>
+    <p class="card__lead">Enter the code shown in your terminal.</p>
+    <form class="form" method="dialog" novalidate data-code-form>
+      <div class="field">
+        <label for="user-code">Code</label>
+        <input class="input input--code" id="user-code" name="user_code" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="XXXX-XXXX" aria-describedby="user-code-error" required />
+        <p class="field__error" id="user-code-error" role="alert"></p>
+      </div>
+      <div class="actions actions--end">
+        <button class="btn btn--primary" type="submit">Next</button>
+      </div>
+    </form>
+  </section>
+
+  <section data-step="confirm" hidden>
+    <h1>Connect the pi CLI?</h1>
+    <p class="card__lead">Check that this code matches your terminal.</p>
+    <p class="code-display" data-code-shown></p>
+    <dl class="facts">
+      <dt>Client</dt>
+      <dd data-client></dd>
+      <dt>Requested</dt>
+      <dd data-requested></dd>
+      <dt>Account</dt>
+      <dd data-account></dd>
+    </dl>
+    <p class="notice">Approve only if you started this sign-in. The pi CLI can then share sessions to your account.</p>
+    <p class="notice notice--error" role="alert" data-decide-error hidden></p>
+    <div class="actions">
+      <button class="btn btn--secondary" type="button" data-deny>Deny</button>
+      <button class="btn btn--primary" type="button" data-approve data-focus>Approve</button>
+    </div>
+  </section>
+
+  <section data-step="approved" hidden>
+    <h1 data-focus>pi CLI connected</h1>
+    <p class="card__lead">Go back to your terminal. You can close this tab.</p>
+  </section>
+
+  <section data-step="denied" hidden>
+    <h1 data-focus>Request denied</h1>
+    <p class="card__lead">The pi CLI was not connected.</p>
+  </section>
+
+  <section data-step="unverified" hidden>
+    <h1 data-focus>Verify your email first</h1>
+    <p class="card__lead">The pi CLI can connect after you verify <strong data-unverified-email></strong>. Open the link we sent you, then come back to this page.</p>
+    <div class="actions actions--end">
+      <button class="btn btn--primary" type="button" data-resend>Send link again</button>
+    </div>
+  </section>
+</Auth>
+
+<script>
+  import '../scripts/account/device.ts';
+</script>

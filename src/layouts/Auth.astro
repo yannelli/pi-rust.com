@@ -1,0 +1,26 @@
+---
+/**
+ * Sign-in, sign-up, verify, reset, and device pages: one centered card. The page's steps are
+ * sections inside the card; the page script shows one at a time. The site header carries the
+ * logo, so the card does not repeat it. Never indexed.
+ */
+import '../styles/account.css';
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<Base title={title} description={description} noindex>
+  <div class="auth">
+    <div class="card">
+      <slot />
+    </div>
+    <slot name="below" />
+  </div>
+  <p class="toast" role="status" aria-live="polite" data-toast hidden></p>
+</Base>

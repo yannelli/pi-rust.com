@@ -1,0 +1,57 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import Icon from '../../components/admin/Icon.astro';
+
+const FILTERS = [
+  { value: 'open', label: 'Open' },
+  { value: 'closed', label: 'Closed' },
+  { value: 'all', label: 'All' },
+];
+---
+
+<Admin title="Bug reports" active="bug-reports" description="Reports sent with /bug in pi-rust. Their files are kept for 90 days.">
+  <div class="toolbar">
+    <label class="find">
+      <Icon name="search" />
+      <span class="sr-only">Search bug reports</span>
+      <input type="search" placeholder="Search by text, version, platform, or ID" autocomplete="off" spellcheck="false" data-find />
+    </label>
+    <div class="filters" role="group" aria-label="Show">
+      {FILTERS.map(({ value, label }, index) => (
+        <button class="filter" type="button" aria-pressed={index === 0 ? 'true' : 'false'} data-filter={value}>{label}</button>
+      ))}
+    </div>
+  </div>
+
+  <section class="surface" aria-label="Bug reports">
+    <ul class="rows" aria-busy="true" data-list>
+      <li class="rows__loading" aria-hidden="true"></li>
+    </ul>
+    <div class="surface__foot">
+      <span data-count></span>
+      <button class="btn btn--secondary btn--small" type="button" data-more hidden>Load more</button>
+    </div>
+  </section>
+
+  <dialog class="dialog dialog--wide" data-report aria-labelledby="report-title">
+    <div class="dialog__scroll">
+      <div class="dialog__body">
+        <h2 id="report-title" data-report-title></h2>
+        <div class="report__pills" data-report-pills></div>
+        <div class="report__text" data-report-text></div>
+        <dl class="facts" data-report-facts></dl>
+        <ul class="files" aria-label="Files" data-report-files></ul>
+        <div data-report-json></div>
+      </div>
+    </div>
+    <div class="dialog__foot">
+      <button class="link-button link-button--danger" type="button" data-report-delete>Delete report</button>
+      <button class="btn btn--secondary" type="button" data-report-status></button>
+      <button class="btn btn--primary" type="button" data-report-done>Done</button>
+    </div>
+  </dialog>
+</Admin>
+
+<script>
+  import '../../scripts/admin/bug-reports.ts';
+</script>

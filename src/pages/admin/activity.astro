@@ -1,0 +1,19 @@
+---
+import Admin from '../../layouts/Admin.astro';
+---
+
+<Admin title="Activity" active="activity" description="What admins changed, newest first. Entries are kept for a year.">
+  <section class="surface" aria-label="Admin activity">
+    <ul class="rows" aria-busy="true" data-list>
+      <li class="rows__loading" aria-hidden="true"></li>
+    </ul>
+    <div class="surface__foot">
+      <span>Only changes made in the admin area are listed.</span>
+      <button class="btn btn--secondary btn--small" type="button" data-more hidden>Load more</button>
+    </div>
+  </section>
+</Admin>
+
+<script>
+  import '../../scripts/admin/activity.ts';
+</script>

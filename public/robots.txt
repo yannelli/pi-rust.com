@@ -1,0 +1,74 @@
+# pi-rust.com: documentation for an open-source tool. Search engines and AI
+# assistants may crawl, index, and cite every page, except shared sessions.
+# Shared sessions (/s/ and /session/) answer with noindex, so search engines
+# may fetch them but do not index them. AI crawlers are asked to skip them.
+
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: Claude-User
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: Amazonbot
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: CCBot
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /s/
+Disallow: /session/
+
+Sitemap: https://pi-rust.com/sitemap-index.xml

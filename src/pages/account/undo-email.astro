@@ -1,0 +1,36 @@
+---
+import Auth from '../../layouts/Auth.astro';
+---
+
+<Auth title="Undo email change" description="Undo a change of the email address of your pi-rust account.">
+  <section data-step="ask">
+    <h1>Undo the email change?</h1>
+    <p class="card__lead">This puts your old address back on your pi-rust account. It also signs out everywhere, removes the passkeys and two-step verification added since the change was asked for, and replaces the password.</p>
+    <p class="card__lead">A link to set a new password then goes to your old address.</p>
+    <p class="notice notice--error" role="alert" data-form-error></p>
+    <div class="actions actions--end">
+      <button class="btn btn--primary" type="button" data-undo>Undo the change</button>
+    </div>
+  </section>
+
+  <section data-step="done" hidden>
+    <h1 data-focus>Change undone</h1>
+    <p class="card__lead">Your account’s email is <strong data-old-email></strong> again. Open the link sent there to set a new password.</p>
+    <div class="actions actions--end">
+      <a class="btn btn--primary" href="/account/sign-in/">Go to sign-in</a>
+    </div>
+  </section>
+
+  <section data-step="failed" hidden>
+    <h1 data-focus>This link doesn’t work</h1>
+    <p class="card__lead" data-failed-reason>It has expired or was already used.</p>
+    <p class="card__lead">If you can still sign in, reset your password from the sign-in page.</p>
+    <div class="actions actions--end">
+      <a class="btn btn--primary" href="/account/sign-in/">Go to sign-in</a>
+    </div>
+  </section>
+</Auth>
+
+<script>
+  import '../../scripts/account/undo-email.ts';
+</script>

@@ -1,0 +1,18 @@
+{
+  "worktree": {
+    "setup": ["npm ci", "npx playwright install chromium"]
+  },
+  "scripts": {
+    "site": {
+      "type": "service",
+      "command": "npx astro build && CI=1 npx wrangler d1 migrations apply pi-rust-accounts --local && npx wrangler dev --ip $HOST --port $PASEO_PORT --infer-origin-from-routes=false --var DEV_MAILBOX:1 --var AUTH_PEPPER:playwright-only-pepper --var TOTP_ENCRYPTION_KEY:dGVzdC1vbmx5LXRvdHAta2V5LTMyLWJ5dGVzLWxvbmc="
+    },
+    "docs": {
+      "type": "service",
+      "command": "npm run dev -- --host $HOST --port $PASEO_PORT"
+    },
+    "build": { "command": "npm run build" },
+    "test": { "command": "npm run build && PORT=${PASEO_WORKTREE_PORT:-4411} npx playwright test" },
+    "og": { "command": "npm run build && npm run og" }
+  }
+}

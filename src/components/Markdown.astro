@@ -1,0 +1,15 @@
+---
+import { withKeys } from '../lib/keys';
+
+/**
+ * A synced markdown page's HTML, with keyboard keys marked as <kbd> (see src/lib/keys.ts).
+ * Pass the page's <Content /> as the slot; it renders only when the entry has no stored HTML.
+ */
+interface Props {
+  entry: { rendered?: { html: string } };
+}
+
+const html = Astro.props.entry.rendered?.html;
+---
+
+{html ? <Fragment set:html={withKeys(html)} /> : <slot />}

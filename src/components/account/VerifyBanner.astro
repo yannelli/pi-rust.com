@@ -1,0 +1,17 @@
+---
+/** Shown on signed-in pages while the email address is not verified. */
+---
+
+<section class="section" data-unverified hidden>
+  <div class="section__body">
+    <div class="section__title">
+      <h2>Verify your email</h2>
+      <span class="badge badge--warn">Not verified</span>
+    </div>
+    <p class="section__desc">Open the link we sent to <strong data-unverified-email></strong>. You need a verified address to share sessions and to connect the pi CLI.</p>
+  </div>
+  <div class="section__foot">
+    <span>The link works for 24 hours.</span>
+    <button class="btn btn--secondary btn--small" type="button" data-resend>Send link again</button>
+  </div>
+</section>

@@ -1,0 +1,34 @@
+---
+import Auth from '../../layouts/Auth.astro';
+---
+
+<Auth title="Reset password" description="Reset the password of your pi-rust account.">
+  <section data-step="request">
+    <h1>Reset password</h1>
+    <p class="card__lead">Enter the email for your account. You’ll get a link to choose a new password.</p>
+    <form class="form" method="dialog" novalidate data-request-form>
+      <div class="field">
+        <label for="email">Email</label>
+        <input class="input" id="email" name="email" type="email" autocomplete="username" inputmode="email" spellcheck="false" aria-describedby="email-error" required autofocus />
+        <p class="field__error" id="email-error" role="alert"></p>
+      </div>
+      <div class="actions">
+        <a class="link-button" href="/account/sign-in/">Back to sign in</a>
+        <button class="btn btn--primary" type="submit">Send link</button>
+      </div>
+    </form>
+  </section>
+
+  <section data-step="sent" hidden>
+    <h1 data-focus>Check your email</h1>
+    <p class="card__lead">If <strong data-sent-to></strong> has an account, it will get a reset link. The link works for 30 minutes.</p>
+    <div class="actions actions--end">
+      <a class="btn btn--secondary" href="/account/sign-in/">Back to sign in</a>
+    </div>
+  </section>
+
+</Auth>
+
+<script>
+  import '../../scripts/account/reset.ts';
+</script>

@@ -1,0 +1,565 @@
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+/*
+ * Tokens. The interface is monochrome; rust, oxide, and amber are the three
+ * pieces of the pi-rust mark and appear only where pi-rust itself does: the
+ * mark, its bar in a chart, its row in a table.
+ */
+:root {
+  color-scheme: light dark;
+
+  --paper: #fafafa;
+  --surface: #ffffff;
+  --ink: #171717;
+  --graphite: #4d4d4d;
+  --muted: #6b6b6b;
+  --hairline: #ebebeb;
+  --hairline-strong: #d6d6d6;
+  --hover: #f2f2f2;
+
+  --rust: #de5e28;
+  --oxide: #a33b1a;
+  --amber: #e6984f;
+
+  --sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale on a 4px grid; display sizes track tight, body sizes do not. */
+  --t-13: 0.8125rem;
+  --t-14: 0.875rem;
+  --t-16: 1rem;
+  --t-18: 1.125rem;
+  --t-20: 1.25rem;
+  --t-24: 1.5rem;
+  --t-32: 2rem;
+  --t-48: 3rem;
+  --t-64: 4rem;
+
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --r-pill: 999px;
+
+  --page: 1200px;
+  --gutter: clamp(20px, 4vw, 32px);
+  --header: 64px;
+  --measure: 72ch;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0a0a0a;
+    --surface: #000000;
+    --ink: #ededed;
+    --graphite: #a1a1a1;
+    --muted: #8f8f8f;
+    --hairline: #262626;
+    --hairline-strong: #3a3a3a;
+    --hover: #1a1a1a;
+  }
+}
+
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header) + 16px);
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--t-16);
+  line-height: 1.6;
+  font-feature-settings: 'ss01';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  flex: 1;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--amber);
+  color: #171717;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+.skip {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 100;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--t-14);
+  text-decoration: none;
+}
+
+.skip:focus {
+  top: 12px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.page {
+  width: 100%;
+  max-width: var(--page);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Buttons are pills. Primary is ink, secondary is a ringed surface. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--r-pill);
+  font-size: var(--t-14);
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms var(--ease), box-shadow 150ms var(--ease);
+}
+
+.btn--primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn--primary:hover {
+  background: color-mix(in srgb, var(--ink) 86%, var(--paper));
+}
+
+.btn--secondary {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--hairline-strong);
+}
+
+.btn--secondary:hover {
+  background: var(--hover);
+}
+
+.btn--small {
+  height: 32px;
+  padding: 0 12px;
+  font-size: var(--t-13);
+}
+
+kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid var(--hairline-strong);
+  /* Pill-shaped, like the search field and buttons it sits in. */
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+/* Code: Shiki writes --shiki-light and --shiki-dark on every token. */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-light);
+  background-color: transparent !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-dark);
+  }
+}
+
+pre,
+code,
+kbd,
+samp {
+  font-family: var(--mono);
+  font-variant-ligatures: none;
+}
+
+/* Long-form text: docs, changelog, benchmark, FAQ. */
+.prose {
+  max-width: var(--measure);
+  color: var(--graphite);
+  font-size: var(--t-16);
+  line-height: 1.7;
+}
+
+.prose > * + * {
+  margin-top: 1em;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: var(--ink);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.prose h2 {
+  margin-top: 2.4em;
+  font-size: var(--t-24);
+  font-weight: 600;
+}
+
+.prose h3 {
+  margin-top: 2em;
+  font-size: var(--t-18);
+  font-weight: 600;
+}
+
+.prose h4 {
+  margin-top: 1.6em;
+  font-size: var(--t-16);
+  font-weight: 600;
+}
+
+.prose :is(h2, h3, h4) + * {
+  margin-top: 0.6em;
+}
+
+.prose strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.prose a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--hairline-strong);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+.prose a:hover {
+  text-decoration-color: var(--ink);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.3em;
+}
+
+.prose li + li {
+  margin-top: 0.35em;
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.35em;
+}
+
+.prose li::marker {
+  color: var(--muted);
+}
+
+.prose :not(pre) > code {
+  padding: 0.12em 0.32em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--ink);
+  font-size: 0.875em;
+  /* break-word wraps a long URL only when it cannot fit a line of its own. "anywhere" would also shrink
+     table columns to nothing and split names like PI_VERSION mid-word. */
+  overflow-wrap: break-word;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Long code in a table, such as a URL, may break anywhere, so the table fits a phone screen.
+   Short code (a target, a key, a path) stays whole; copy.ts marks it with .code--short. */
+.prose td > code {
+  overflow-wrap: anywhere;
+}
+
+.prose td > code.code--short {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+/* Keyboard keys. src/lib/keys.ts marks them in the built docs. */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  border: 0;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--graphite);
+  font: 500 0.75rem/1 var(--sans);
+  white-space: nowrap;
+}
+
+/* The group is a <kbd> too; undo the base kbd box so only the keys show. */
+.kbd-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.kbd-group > span {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.prose pre {
+  position: relative;
+  overflow-x: auto;
+  padding: 16px 18px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface) !important;
+  font-size: var(--t-13);
+  line-height: 1.65;
+}
+
+.prose blockquote {
+  padding-left: 1em;
+  border-left: 2px solid var(--hairline-strong);
+}
+
+.prose hr {
+  margin-block: 2.5em;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+/* Tables scroll on their own instead of widening the page. The client script frames
+   each table; without it, the table itself scrolls. */
+.prose > table {
+  display: block;
+  overflow-x: auto;
+}
+/* Tables scroll on their own instead of widening the page. */
+.prose .table {
+  overflow-x: auto;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-14);
+  line-height: 1.55;
+}
+
+.prose th,
+.prose td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hairline);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  color: var(--ink);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.prose tr:last-child td {
+  border-bottom: 0;
+}
+
+.prose .code-wrap {
+  position: relative;
+}
+
+/* Room on the right so no line runs under the copy button. */
+.prose .code-wrap pre {
+  padding-right: 52px;
+}
+
+/* On touch screens the copy button always shows, so a script starts below it instead of under it. */
+@media (hover: none) {
+  .prose .code-wrap:not(.code-wrap--one) pre {
+    padding-top: 52px;
+  }
+}
+
+/* On a phone, a one-line command wraps like a terminal does, so none of it hides past the edge.
+   A script keeps its line breaks and scrolls sideways, because wrapped scripts lose their shape. */
+@media (max-width: 700px) {
+  .prose .code-wrap--one pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+.copy-code {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 150ms var(--ease);
+}
+
+.copy-code svg {
+  width: 15px;
+  height: 15px;
+}
+
+.copy-code .copy__done,
+.copy-code[data-copied] .copy__icon {
+  display: none;
+}
+
+.copy-code[data-copied] .copy__done {
+  display: block;
+}
+
+.code-wrap:hover .copy-code,
+.copy-code:focus-visible,
+.copy-code[data-copied] {
+  opacity: 1;
+}
+
+.copy-code[data-copied] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+@media (hover: none) {
+  .copy-code {
+    opacity: 1;
+  }
+}
+
+/* Phones: a table of three or more columns shows each row as a block, each value under its column name. */
+@media (max-width: 700px) {
+  .prose .table--stack thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .prose .table--stack :is(table, tbody, tr, td) {
+    display: block;
+  }
+
+  .prose .table--stack tr {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .prose .table--stack tr:last-child {
+    border-bottom: 0;
+  }
+
+  .prose .table--stack td {
+    padding: 4px 0;
+    border: 0;
+  }
+
+  .prose .table--stack td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: var(--t-13);
+    font-weight: 500;
+  }
+
+  .prose .table--stack td:first-child::before {
+    content: none;
+  }
+
+  .prose .table--stack td:first-child {
+    color: var(--ink);
+    font-weight: 600;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

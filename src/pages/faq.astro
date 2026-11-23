@@ -1,0 +1,46 @@
+---
+import Docs from '../layouts/Docs.astro';
+import { FAQ } from '../data/faq';
+import { faqPage } from '../lib/seo';
+
+const description = 'Short answers about pi-rust: what it is, how it differs from pi, how to install and update it, and which models, editors, and platforms it supports.';
+const headings = FAQ.map((item) => ({ depth: 2, slug: item.id, text: item.question }));
+---
+
+<Docs
+  title="Frequently asked questions"
+  description={description}
+  group="Help"
+  headings={headings}
+  image="/og/faq.png"
+  schema={[faqPage('/faq/', FAQ.map(({ question, answer }) => ({ question, answer })))]}
+>
+  {FAQ.map((item) => (
+    <section class="faq" aria-labelledby={item.id}>
+      <h2 id={item.id}>{item.question}</h2>
+      <p>{item.answer}</p>
+      {item.links && (
+        <p class="faq__links">
+          {item.links.map((link) => <a href={link.href}>{link.label}</a>)}
+        </p>
+      )}
+    </section>
+  ))}
+</Docs>
+
+<style>
+  .faq + .faq {
+    margin-top: 0;
+  }
+
+  .faq > * + * {
+    margin-top: 0.75em;
+  }
+
+  .faq__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: var(--t-14);
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+import Panel from '../../layouts/Panel.astro';
+import VerifyBanner from '../../components/account/VerifyBanner.astro';
+
+const EXPIRATIONS = [
+  { value: 'never', label: 'Never' },
+  { value: String(60 * 60), label: '1 hour' },
+  { value: String(24 * 60 * 60), label: '1 day' },
+  { value: String(7 * 24 * 60 * 60), label: '7 days' },
+  { value: String(30 * 24 * 60 * 60), label: '30 days' },
+];
+const VISIBILITIES = [
+  { value: 'link', label: 'Anyone with the link' },
+  { value: 'private', label: 'Only me' },
+];
+---
+
+<Panel title="Shares" active="shares" description="The sessions you shared from the pi CLI to pi-rust.com.">
+  <VerifyBanner />
+  <section class="section" aria-labelledby="shares-title">
+    <div class="section__body">
+      <h2 id="shares-title">Shared sessions</h2>
+      <p class="section__desc">Each share has an unlisted link that search engines don’t index. Choose who can open it and when it expires.</p>
+      <ul class="list" aria-busy="true" data-shares>
+        <li class="list__loading" aria-hidden="true"></li>
+      </ul>
+    </div>
+    <div class="section__foot" data-shares-foot hidden>
+      <span data-shares-count></span>
+      <div class="section__actions">
+        <button class="btn btn--secondary btn--small" type="button" data-delete-expired hidden>Delete expired</button>
+        <button class="btn btn--danger btn--small" type="button" data-delete-all>Delete all shares</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="menu" id="share-menu" popover="manual" role="menu" aria-label="Share settings" data-share-menu>
+    <button class="menu__item" type="button" role="menuitem" tabindex="-1" data-menu-rename>Rename</button>
+    <div class="menu__sep" role="separator"></div>
+    <p class="menu__label" aria-hidden="true">Expiration</p>
+    <div role="group" aria-label="Expiration">
+      {EXPIRATIONS.map(({ value, label }) => (
+        <button class="menu__item" type="button" role="menuitemradio" aria-checked="false" tabindex="-1" data-expires={value}>{label}</button>
+      ))}
+    </div>
+    <div class="menu__sep" role="separator"></div>
+    <p class="menu__label" aria-hidden="true">Visibility</p>
+    <div role="group" aria-label="Visibility">
+      {VISIBILITIES.map(({ value, label }) => (
+        <button class="menu__item" type="button" role="menuitemradio" aria-checked="false" tabindex="-1" data-visibility={value}>{label}</button>
+      ))}
+    </div>
+    <div class="menu__sep" role="separator"></div>
+    <button class="menu__item menu__item--danger" type="button" role="menuitem" tabindex="-1" data-menu-delete>Delete</button>
+  </div>
+
+  <dialog class="dialog" data-share-rename aria-labelledby="share-rename-title">
+    <form method="dialog" novalidate data-share-rename-form>
+      <div class="dialog__body">
+        <h2 id="share-rename-title">Rename share</h2>
+        <div class="field">
+          <label for="share-title">Title</label>
+          <input class="input" id="share-title" name="title" maxlength="200" autocomplete="off" aria-describedby="share-title-error" required />
+          <p class="field__error" id="share-title-error" role="alert"></p>
+        </div>
+      </div>
+      <div class="dialog__foot">
+        <button class="btn btn--secondary" type="button" data-share-rename-cancel>Cancel</button>
+        <button class="btn btn--primary" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+</Panel>
+
+<script>
+  import '../../scripts/account/shares.ts';
+</script>

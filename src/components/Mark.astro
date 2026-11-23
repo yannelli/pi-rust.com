@@ -1,0 +1,134 @@
+---
+/**
+ * The pi-rust mark as an object: the logo's three pieces on its 4×4 grid,
+ * extruded toward the upper right. On first load the pieces drop into place
+ * one after another, the page's only unprompted motion. Reduced motion and
+ * print get the assembled mark.
+ *
+ * Grid (row, col) from docs/assets/pi-rust-logo.svg:
+ *   A A A .
+ *   B . A .
+ *   B B . C
+ *   B . . C
+ */
+interface Props {
+  size?: number;
+  animate?: boolean;
+  class?: string;
+}
+
+const { size = 360, animate = false, class: className } = Astro.props;
+
+const U = 100;
+const K = 30;
+
+type Cell = [row: number, col: number];
+// `path` is the piece's outline in the logo file, so each front face is one shape with no seams.
+const PIECES: { id: string; front: string; top: string; side: string; path: string; cells: Cell[] }[] = [
+  // Drawn back to front: B's faces reach into A's rows, so A covers them.
+  { id: 'b', front: '#A33B1A', top: '#BA5C3D', side: '#7E2D13', path: 'M165.29 282.65H282.65V400H400V517.36H282.65V634.72H165.29Z', cells: [[1, 0], [2, 0], [2, 1], [3, 0]] },
+  { id: 'c', front: '#E6984F', top: '#EFB47F', side: '#B8773C', path: 'M517.36 400H634.72V634.72H517.36Z', cells: [[2, 3], [3, 3]] },
+  { id: 'a', front: '#DE5E28', top: '#E8825A', side: '#AF481E', path: 'M165.29 165.29H517.36V400H400V282.65H165.29Z', cells: [[0, 0], [0, 1], [0, 2], [1, 2]] },
+];
+
+/** The logo's grid starts at 165.29 with cells 117.3575 wide; this maps it onto cells of U. */
+const LOGO_ORIGIN = 165.29;
+const LOGO_CELL = (634.72 - 165.29) / 4;
+
+const occupied = new Set(PIECES.flatMap((p) => p.cells.map(([r, c]) => `${r},${c}`)));
+const has = (r: number, c: number) => occupied.has(`${r},${c}`);
+const pts = (points: [number, number][]) => points.map(([x, y]) => `${x},${y}`).join(' ');
+
+const faces = PIECES.map((piece) => {
+  const cells = [...piece.cells].sort((a, b) => b[0] - a[0]);
+  return {
+    ...piece,
+    sides: cells
+      .filter(([r, c]) => !has(r, c + 1))
+      .map(([r, c]) => {
+        const x = (c + 1) * U;
+        return pts([[x, r * U], [x + K, r * U - K], [x + K, (r + 1) * U - K], [x, (r + 1) * U]]);
+      }),
+    tops: cells
+      .filter(([r, c]) => !has(r - 1, c))
+      .map(([r, c]) => pts([[c * U, r * U], [c * U + K, r * U - K], [(c + 1) * U + K, r * U - K], [(c + 1) * U, r * U]])),
+
+  };
+});
+---
+
+<div class:list={['mark', className, { 'mark--animate': animate }]} style={`--size:${size}px`}>
+  <svg viewBox={`-20 ${-K - 20} ${4 * U + K + 40} ${4 * U + K + 70}`} role="img" aria-labelledby="mark-title">
+    <title id="mark-title">The pi-rust mark: three blocks that form the letter pi</title>
+    <defs>
+      <radialGradient id="mark-shadow" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="currentColor" stop-opacity="0.22" />
+        <stop offset="1" stop-color="currentColor" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+    <ellipse class="mark__shadow" cx={2 * U + K / 2} cy={4 * U + 26} rx={2.3 * U} ry="26" fill="url(#mark-shadow)" />
+    {faces.map((piece, index) => (
+      <g class={`mark__piece mark__piece--${piece.id}`} style={`--i:${index}`}>
+        {piece.sides.map((p) => <polygon points={p} fill={piece.side} stroke={piece.side} stroke-width="0.6" stroke-linejoin="round" />)}
+        {piece.tops.map((p) => <polygon points={p} fill={piece.top} stroke={piece.top} stroke-width="0.6" stroke-linejoin="round" />)}
+        <path d={piece.path} fill={piece.front} transform={`scale(${U / LOGO_CELL}) translate(${-LOGO_ORIGIN} ${-LOGO_ORIGIN})`} />
+      </g>
+    ))}
+  </svg>
+</div>
+
+<style>
+  .mark {
+    width: min(var(--size), 100%);
+    aspect-ratio: 470 / 500;
+    color: var(--ink);
+  }
+
+  .mark svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Drop, settle, then hold. A piece lands slightly past its place and springs back. */
+  @keyframes drop {
+    from {
+      transform: translateY(-140px);
+      opacity: 0;
+    }
+    60% {
+      transform: translateY(6px);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes shadow-in {
+    from {
+      opacity: 0;
+      transform: scaleX(0.6);
+    }
+  }
+
+  .mark--animate .mark__piece {
+    transform-box: view-box;
+    animation: drop 760ms cubic-bezier(0.3, 0.7, 0.2, 1) both;
+    animation-delay: calc(120ms + var(--i) * 170ms);
+  }
+
+  .mark--animate .mark__shadow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: shadow-in 900ms var(--ease) both 200ms;
+  }
+
+  @media print {
+    .mark__piece,
+    .mark__shadow {
+      animation: none !important;
+    }
+  }
+</style>

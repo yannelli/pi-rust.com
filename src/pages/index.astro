@@ -1,0 +1,598 @@
+---
+import { Code } from 'astro:components';
+import Base from '../layouts/Base.astro';
+import Mark from '../components/Mark.astro';
+import InstallPicker from '../components/InstallPicker.astro';
+import BenchmarkChart from '../components/BenchmarkChart.astro';
+import upstream from '../data/upstream.json';
+import { software } from '../lib/seo';
+import { parityRows } from '../lib/parity';
+import { AUTHOR, PARITY_REPORT_URL, RELEASE, REPO_URL, SUMMARY, UPSTREAM_PI_URL, formatDate } from '../lib/site';
+
+const description = SUMMARY;
+
+const harnesses = upstream.benchmark.harnesses;
+const [rust, node, codex] = harnesses;
+const mib = (value: number) => Math.round(value).toLocaleString('en-US');
+
+const QUICK_START = `pi                                  # talk to pi in this folder
+pi -p "Summarize src/main.rs"       # one answer, then exit
+pi --mode json -p "List the TODOs"  # one JSON event per line
+pi --mode rpc                       # JSON-RPC over stdio
+pi -c                               # continue the last session here
+pi --model openai/gpt-5.5 --thinking high
+cat error.log | pi -p "Explain this error"`;
+
+const ADDITIONS = [
+  {
+    name: '/diff, /review, /undo, and /retry',
+    text: 'Slash commands upstream pi doesn\'t have, plus /init and /context.',
+    href: '/docs/commands/',
+  },
+  {
+    name: 'pi doctor, pi sessions, and pi stats',
+    text: 'Check your setup, list and delete sessions from the shell, and see your usage.',
+    href: '/docs/cli/',
+  },
+  {
+    name: 'Run limits and structured output',
+    text: 'Stop a run at --max-turns or --max-cost, or hold the answer to a JSON schema with --output-schema.',
+    href: '/docs/cli/#run-limits',
+  },
+  {
+    name: 'ACP mode for Zed',
+    text: 'pi --mode acp runs pi as an agent inside Zed and other ACP editors. Upstream pi needs a separate adapter.',
+    href: '/docs/acp/',
+  },
+  {
+    name: 'Subscription usage limits',
+    text: '/usage shows the 5-hour and weekly windows of your Claude, ChatGPT, Cursor, SuperGrok, and Antigravity logins.',
+    href: '/docs/usage-limits/',
+  },
+  {
+    name: 'Native extensions and a marketplace',
+    text: 'An extension can be a native program that talks JSON-RPC over stdio, installed from a signed index.',
+    href: '/docs/marketplace/',
+  },
+];
+
+const PROVIDERS = [
+  'Anthropic',
+  'OpenAI',
+  'OpenAI Codex',
+  'Google Gemini',
+  'Google Vertex AI',
+  'Amazon Bedrock',
+  'Azure OpenAI',
+  'Mistral',
+  'xAI',
+  'GitHub Copilot',
+  'OpenRouter',
+  'Kimi',
+  'Cursor',
+  'Google Antigravity',
+  'llama.cpp',
+];
+---
+
+<Base
+  title="pi-rust"
+  fullTitle="pi-rust: a drop-in Rust port of the pi coding agent"
+  description={description}
+  imageAlt="pi-rust: the pi coding agent, ported 1:1 to Rust"
+  schema={[software(description)]}
+>
+  <section class="hero page" aria-labelledby="hero-title">
+    <div class="hero__copy">
+      <h1 id="hero-title">The pi coding agent, ported 1:1 to&nbsp;Rust.</h1>
+      <p class="hero__lead">
+        A drop-in replacement for pi. It reads your <code>~/.pi/agent</code> setup and runs your extensions, skills, and
+        packages as they are, from one binary with no&nbsp;Node.js.
+      </p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="/install/">Install pi-rust</a>
+        <a class="btn btn--secondary" href="/docs/quick-start/">Read the quick start</a>
+      </div>
+      <InstallPicker />
+    </div>
+
+    <Mark class="hero__mark" size={380} animate />
+
+    <ul class="hero__facts">
+      <li><a href="#drop-in">A single-binary drop-in replacement for pi and its extensions.</a></li>
+      <li class="hero__version">
+        <a href="/changelog/">Version {RELEASE.version}</a>, {formatDate(RELEASE.date)}
+      </li>
+    </ul>
+  </section>
+
+  <section class="band band--stack page" id="drop-in" aria-labelledby="drop-in-title">
+    <div class="band__text">
+      <h2 id="drop-in-title">A drop-in replacement for pi</h2>
+      <p>Install pi-rust, run <code>pi</code>, and keep working the way you do now.</p>
+    </div>
+    <ul class="pillars">
+      <li>
+        <h3>Your setup carries over</h3>
+        <p>
+          pi-rust reads <code>~/.pi/agent</code>: logins, settings, models, key bindings, MCP servers, and sessions.
+          Session files and RPC events match pi byte for byte, so you can switch between the two.
+        </p>
+        <a class="link" href="/docs/configuration/">Configuration files</a>
+      </li>
+      <li>
+        <h3>Your extensions keep working</h3>
+        <p>
+          TypeScript extensions, skills, prompt templates, themes, and pi packages work as they are. Extensions run on a
+          built-in QuickJS engine with the Node built-in modules, or on Node 22 if you set <code>extensionRuntime</code>.
+        </p>
+        <a class="link" href="/docs/cli/#extension-runtime">Extension runtime</a>
+      </li>
+      <li>
+        <h3>1:1 parity, checked daily</h3>
+        <p>A workflow compares pi-rust with upstream pi every day. In the latest report, pi-rust has:</p>
+        <dl class="parity">
+          {parityRows.map((row) => (
+            <div>
+              <dt>{row.label}</dt>
+              <dd class:list={{ 'parity--complete': row.complete }}>
+                {row.complete ? (
+                  <>
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                      <path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    All of pi's
+                  </>
+                ) : (
+                  `All but ${row.missing}`
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <a class="link" href={PARITY_REPORT_URL} rel="noopener">Latest parity report</a>
+      </li>
+    </ul>
+  </section>
+
+  <section class="band page" aria-labelledby="memory-title">
+    <div class="band__text">
+      <h2 id="memory-title">Memory with 20 sessions at once</h2>
+      <p>
+        20 pi-rust sessions running at once on a 16 GB Mac peaked at {mib(rust.peakMiB)} MiB in total. {node.name} used{' '}
+        {mib(node.peakMiB)} MiB and {codex.name} used {mib(codex.peakMiB)} MiB.
+      </p>
+      <p class="band__note"><a href="/benchmarks/">How it was measured</a></p>
+    </div>
+    <BenchmarkChart />
+  </section>
+
+  <section class="band page" aria-labelledby="start-title">
+    <div class="band__text">
+      <h2 id="start-title">Start in the folder you work in</h2>
+      <p>
+        Run <code>pi</code> in a project and talk to it. Use print mode for one answer, JSON or RPC mode when another
+        program drives pi, and <code>-c</code> to pick up the last session.
+      </p>
+      <p><a class="link" href="/docs/quick-start/">More in the quick start</a></p>
+    </div>
+    <div class="terminal">
+      <Code code={QUICK_START} lang="sh" themes={{ light: 'github-light', dark: 'github-dark' }} defaultColor={false} />
+    </div>
+  </section>
+
+  <section class="band band--stack page" aria-labelledby="adds-title">
+    <div class="band__text">
+      <h2 id="adds-title">What pi-rust adds to pi</h2>
+      <p>
+        Everything in pi, plus:
+      </p>
+    </div>
+    <ul class="adds">
+      {ADDITIONS.map((item) => (
+        <li>
+          <a href={item.href}>
+            <strong>{item.name}</strong>
+            <span>{item.text}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p><a class="link" href="/docs/differences/">Every difference from upstream pi</a></p>
+  </section>
+
+  <section class="band page" aria-labelledby="models-title">
+    <div class="band__text">
+      <h2 id="models-title">Providers, MCP, and editors</h2>
+      <p>
+        Every provider pi supports, plus Cursor and Google Antigravity subscriptions. Log in with <code>/login</code> or
+        an API key. MCP servers connect over stdio and HTTP, and pi runs inside Zed through ACP.
+      </p>
+      <p>
+        <a class="link" href="/docs/providers/">Providers and logins</a>
+        <a class="link" href="/docs/mcp/">MCP servers</a>
+        <a class="link" href="/docs/acp/">ACP mode</a>
+      </p>
+    </div>
+    <ul class="chips" aria-label="Providers">
+      {PROVIDERS.map((name) => <li>{name}</li>)}
+    </ul>
+  </section>
+
+  <section class="credit page" aria-labelledby="credit-title">
+    <h2 id="credit-title">Who makes pi-rust</h2>
+    <p>
+      <a href={AUTHOR.url} rel="author">{AUTHOR.name}</a>, a software engineer in New York, builds and maintains pi-rust.
+      It's a 1:1 Rust port of <a href={UPSTREAM_PI_URL} rel="noopener">pi</a>,{' '}
+      <a href={PARITY_REPORT_URL} rel="noopener">checked against upstream every day</a>.
+    </p>
+    <div class="credit__actions">
+      <a class="btn btn--secondary" href={AUTHOR.projectUrl}>Read the project page on ryanyannelli.com</a>
+      <a class="btn btn--secondary" href={REPO_URL} rel="noopener">Star it on GitHub</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.9fr) minmax(0, 0.55fr);
+    align-items: center;
+    gap: 40px;
+    min-height: calc(100dvh - var(--header) - 40px);
+    padding-block: 56px 72px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.75rem, 5.6vw, var(--t-64));
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.05em;
+    text-wrap: balance;
+  }
+
+  .hero__lead {
+    max-width: 34rem;
+    margin-top: 24px;
+    color: var(--graphite);
+    font-size: var(--t-18);
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  .hero__lead code,
+  .band code {
+    color: var(--ink);
+    font-size: 0.9em;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-block: 32px 28px;
+  }
+
+  .hero :global(.hero__mark) {
+    justify-self: center;
+  }
+
+  .hero__facts {
+    display: grid;
+    gap: 10px;
+    padding: 0;
+    list-style: none;
+    font-size: var(--t-16);
+  }
+
+  .hero__facts a {
+    text-decoration: none;
+  }
+
+  .hero__facts a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .hero__version {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: var(--t-14);
+  }
+
+  .band {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 56px;
+    align-items: start;
+    padding-block: clamp(56px, 8vw, 96px);
+    border-top: 1px solid var(--hairline);
+  }
+
+  .band--stack {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .band h2,
+  .credit h2 {
+    font-size: clamp(var(--t-32), 3.4vw, var(--t-48));
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .band__text {
+    max-width: 34rem;
+  }
+
+  .band__text p {
+    margin-top: 16px;
+    color: var(--graphite);
+    font-size: var(--t-18);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .band__text p.band__note {
+    font-size: var(--t-14);
+  }
+
+  .link {
+    color: var(--ink);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--hairline-strong);
+    text-underline-offset: 0.25em;
+  }
+
+  .link + .link {
+    margin-left: 18px;
+  }
+
+  .link:hover,
+  .band__note a:hover {
+    text-decoration-color: var(--ink);
+  }
+
+  .band__note a {
+    color: var(--ink);
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--hairline-strong);
+  }
+
+  .terminal {
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+  }
+
+  .terminal :global(pre) {
+    overflow-x: auto;
+    padding: 24px;
+    font-size: var(--t-13);
+    line-height: 1.8;
+  }
+
+  .adds {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0;
+    border-top: 1px solid var(--hairline);
+    list-style: none;
+  }
+
+  .adds li {
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .adds li:nth-child(odd) {
+    border-right: 1px solid var(--hairline);
+  }
+
+  .adds a {
+    display: grid;
+    gap: 6px;
+    height: 100%;
+    padding: 24px 28px 26px 0;
+    text-decoration: none;
+  }
+
+  .adds li:nth-child(even) a {
+    padding-left: 28px;
+  }
+
+  .adds strong {
+    font-size: var(--t-18);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .adds span {
+    color: var(--graphite);
+    line-height: 1.55;
+  }
+
+  .adds a:hover strong {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 0;
+    border-top: 1px solid var(--hairline);
+    list-style: none;
+  }
+
+  .pillars li {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 12px;
+    padding: 28px 28px 4px;
+  }
+
+  .pillars li:first-child {
+    padding-left: 0;
+  }
+
+  .pillars li + li {
+    border-left: 1px solid var(--hairline);
+  }
+
+  .pillars h3 {
+    font-size: var(--t-20);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .pillars p {
+    color: var(--graphite);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .pillars .link {
+    margin-top: auto;
+  }
+
+  .parity {
+    display: grid;
+    width: 100%;
+    margin: 0;
+  }
+
+  .parity div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: 8px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .parity dd {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .parity--complete svg {
+    color: var(--rust);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    gap: 8px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chips li {
+    padding: 8px 14px;
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--hairline-strong);
+    font-size: var(--t-14);
+  }
+
+  .credit {
+    padding-block: clamp(56px, 8vw, 96px) 0;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .credit p {
+    max-width: 44rem;
+    margin-top: 16px;
+    color: var(--graphite);
+    font-size: var(--t-18);
+    line-height: 1.6;
+  }
+
+  .credit p a {
+    color: var(--ink);
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--hairline-strong);
+  }
+
+  .credit__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  @media (max-width: 1080px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+      min-height: 0;
+    }
+
+    .hero__facts {
+      grid-column: 1 / -1;
+      grid-auto-flow: column;
+      justify-content: start;
+      gap: 24px;
+    }
+
+    .hero__version {
+      margin-top: 0;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .hero,
+    .band {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero {
+      gap: 32px;
+      padding-top: 32px;
+    }
+
+    .hero :global(.hero__mark) {
+      justify-self: center;
+      width: min(260px, 70vw);
+    }
+
+    .hero__facts {
+      grid-auto-flow: row;
+      gap: 8px;
+    }
+
+    .band {
+      gap: 32px;
+    }
+
+    .adds,
+    .pillars {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pillars li,
+    .pillars li:first-child {
+      padding: 24px 0 28px;
+    }
+
+    .pillars li + li {
+      border-top: 1px solid var(--hairline);
+      border-left: 0;
+    }
+
+    .adds li:nth-child(odd) {
+      border-right: 0;
+    }
+
+    .adds li:nth-child(even) a {
+      padding-left: 0;
+    }
+  }
+</style>

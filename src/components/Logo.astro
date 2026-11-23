@@ -1,0 +1,14 @@
+---
+/** The flat pi-rust mark from docs/assets/pi-rust-logo.svg, for the header and footer. */
+interface Props {
+  size?: number;
+}
+
+const { size = 22 } = Astro.props;
+---
+
+<svg class="logo" width={size} height={size} viewBox="165 165 470 470" aria-hidden="true" focusable="false">
+  <path fill="#DE5E28" d="M165.29 165.29H517.36V400H400V282.65H165.29Z" />
+  <path fill="#A33B1A" d="M165.29 282.65H282.65V400H400V517.36H282.65V634.72H165.29Z" />
+  <path fill="#E6984F" d="M517.36 400H634.72V634.72H517.36Z" />
+</svg>

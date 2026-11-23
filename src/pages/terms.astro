@@ -1,0 +1,320 @@
+---
+import Docs from '../layouts/Docs.astro';
+import { AUTHOR, REPO_URL, UPSTREAM_AUTHOR, UPSTREAM_PI_URL } from '../lib/site';
+import { LEGAL_EMAIL, OPERATOR, PRIVACY_EMAIL, SITE_REPO_URL, TERMS_VERSION } from '../lib/legal';
+
+// Each statement about the services restates what docs/ and the Worker say they do. When the services or these
+// Terms change, change this page and TERMS_VERSION with it (docs/accounts.md, "Terms of Service").
+const EFFECTIVE = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(
+  new Date(`${TERMS_VERSION}T00:00:00Z`),
+);
+const PHONE_LINK = `tel:${OPERATOR.phone.replace(/\s/g, '')}`;
+
+const description =
+  'The terms for using pi-rust.com: accounts, session sharing, bug reports, and the services the pi-rust app uses. Free, as is, under New York law.';
+
+const headings = [
+  { depth: 2, slug: 'key-points', text: 'Key points' },
+  { depth: 2, slug: 'who-we-are', text: 'Who we are and what these Terms cover' },
+  { depth: 2, slug: 'acceptance', text: 'Accepting these Terms' },
+  { depth: 2, slug: 'eligibility', text: 'Who can use the services' },
+  { depth: 2, slug: 'outside-us', text: 'Use outside the United States' },
+  { depth: 2, slug: 'accounts', text: 'Your account' },
+  { depth: 2, slug: 'your-content', text: 'Your content' },
+  { depth: 2, slug: 'your-responsibility', text: 'What you share is your responsibility' },
+  { depth: 2, slug: 'acceptable-use', text: 'Acceptable use' },
+  { depth: 2, slug: 'moderation', text: 'Moderation, suspension, and deletion' },
+  { depth: 2, slug: 'free-service', text: 'A free service without support or backups' },
+  { depth: 2, slug: 'changes-to-services', text: 'Changes to the services' },
+  { depth: 2, slug: 'open-source', text: 'Open-source software and website code' },
+  { depth: 2, slug: 'third-parties', text: 'Third-party services' },
+  { depth: 2, slug: 'privacy', text: 'Privacy' },
+  { depth: 2, slug: 'copyright', text: 'Copyright and DMCA' },
+  { depth: 3, slug: 'copyright-notices', text: 'How to send a notice' },
+  { depth: 3, slug: 'counter-notices', text: 'How to send a counter notice' },
+  { depth: 3, slug: 'repeat-infringers', text: 'Repeat infringers' },
+  { depth: 2, slug: 'warranties', text: 'Disclaimer of warranties' },
+  { depth: 2, slug: 'liability', text: 'Limitation of liability' },
+  { depth: 2, slug: 'no-relationship', text: 'No relationship or other duties' },
+  { depth: 2, slug: 'indemnity', text: 'Indemnity' },
+  { depth: 2, slug: 'disputes', text: 'Disputes' },
+  { depth: 3, slug: 'courts', text: 'Law and courts' },
+  { depth: 3, slug: 'jury-waiver', text: 'Jury trial waiver' },
+  { depth: 3, slug: 'individual-claims', text: 'Individual claims only' },
+  { depth: 3, slug: 'time-limit', text: 'One year to bring a claim' },
+  { depth: 2, slug: 'changes', text: 'Changes to these Terms' },
+  { depth: 2, slug: 'termination', text: 'Termination and survival' },
+  { depth: 2, slug: 'assignment', text: 'Assignment' },
+  { depth: 2, slug: 'notices', text: 'Notices and electronic communications' },
+  { depth: 2, slug: 'export', text: 'Export and sanctions' },
+  { depth: 2, slug: 'california', text: 'California notice' },
+  { depth: 2, slug: 'general', text: 'General terms' },
+  { depth: 2, slug: 'contact', text: 'Contact' },
+];
+---
+
+<Docs title="Terms of service" description={description} group="Legal" headings={headings} image="/og/terms.png">
+  <p slot="before" class="terms-date">Effective {EFFECTIVE}</p>
+
+  <h2 id="key-points">Key points</h2>
+  <p>These points summarize the Terms below. The full Terms control.</p>
+  <ul>
+    <li>These Terms are a contract between you and {AUTHOR.name}, an individual. They cover the services at pi-rust.com. The pi-rust software and the code of this website have their own MIT licenses.</li>
+    <li>You must be 18 or older to use the services. We run them from the United States and direct them to people there.</li>
+    <li>You keep ownership of what you share, and you are responsible for it. Check every session for secrets and other people’s data before you share it.</li>
+    <li>The services are free. We provide them as is, without warranties, support, or backups, and we can change or stop them at any time.</li>
+    <li><strong>Subject to the exceptions in these Terms, our total liability to you is limited to US$100.</strong></li>
+    <li><strong>Disputes must be brought individually in the state courts in Westchester County, New York, or the federal court in White Plains. Where the law allows, both sides waive a jury and must file within one year. See <a href="#disputes">Disputes</a> for the exceptions.</strong></li>
+  </ul>
+
+  <h2 id="who-we-are">Who we are and what these Terms cover</h2>
+  <p>pi-rust.com is run by <a href={AUTHOR.url} rel="author">{AUTHOR.name}</a>, an individual in Westchester County, New York, United States, who maintains pi-rust. He does not run it through a company or other organization. In these Terms, “we”, “us”, and “our” mean him, and “you” and “your” mean the person who uses the services.</p>
+  <p>These Terms of Service (“Terms”) govern your use of the services, which are the website at pi-rust.com and everything it runs for you and for the pi-rust app:</p>
+  <ul>
+    <li>the documentation and other pages of the site, and the install scripts it serves</li>
+    <li>accounts, including sign-in with a password or passkey, two-step verification, and changes of email address</li>
+    <li>the <a href="/device/">device page</a>, where you let the pi-rust app sign in to your account</li>
+    <li>session sharing, which stores the sessions you upload from the pi-rust app and shows them at their links</li>
+    <li>bug reports that the pi-rust <code>/bug</code> command uploads</li>
+    <li>install telemetry, if you turn it on</li>
+    <li>the model catalog that the pi-rust app downloads</li>
+    <li>the <a href="/session/">session viewer</a>, which shows a session stored in a GitHub gist</li>
+  </ul>
+  <p>We call these the “services”. People we appoint as admins help us moderate them. Admins act for us and owe you no duties of their own.</p>
+
+  <h2 id="acceptance">Accepting these Terms</h2>
+  <p>You accept these Terms when you check the box that says you agree to them and create an account. You also accept them when you use the services after you know of these Terms, for example after you see a link to them on this site or in the pi-rust app. If you do not agree to these Terms, do not use the services.</p>
+  <p>You can use the pi-rust app without these services. Set <code>PI_CATALOG_URL</code> to another server, leave install telemetry off, and do not upload bug reports or share sessions to pi-rust.com.</p>
+  <p>If you use the services for your employer or another organization, you accept these Terms for yourself and for that organization, and you confirm that you have the authority to do so. “You” then means both.</p>
+
+  <h2 id="eligibility">Who can use the services</h2>
+  <p>You may use the services only if all of these are true:</p>
+  <ul>
+    <li>You are 18 or older.</li>
+    <li>You can form a binding contract with us.</li>
+    <li>The law does not bar you from using the services. See <a href="#export">Export and sanctions</a>.</li>
+    <li>We have not suspended or deleted your account before, unless we told you that you may come back.</li>
+  </ul>
+  <p>Parental control tools can help limit a minor’s access to material that is harmful to minors. Tools of this kind are commercially available, for example Apple Screen Time, Google Family Link, and Microsoft Family Safety.</p>
+
+  <h2 id="outside-us">Use outside the United States</h2>
+  <p>We run the services from the United States and direct them to people in the United States. We do not direct them to people in the European Economic Area, the United Kingdom, Switzerland, or any other country. We make no claim that the services are appropriate or available for use outside the United States.</p>
+  <p>If you use the services from another country, you do so on your own initiative, and you are responsible for following the laws that apply where you are.</p>
+
+  <h2 id="accounts">Your account</h2>
+  <p>Use an email address that you own and can read. We send email about your account to that address.</p>
+  <p>Keep your password, recovery codes, passkeys, and pi CLI tokens secret and secure. pi CLI tokens start with <code>pirs_</code> and let the pi-rust app use your account. One account is for one person. Do not share it or let anyone else use it.</p>
+  <p>You are responsible for your own use of your account and for keeping your credentials secure. This does not make you responsible for use that our failure to meet a duty we owe you caused. If you think someone else used them, change your password, remove sessions and tokens you do not know on your <a href="/account/security/">Security page</a>, and email <a href={`mailto:${PRIVACY_EMAIL}`}>{PRIVACY_EMAIL}</a>.</p>
+
+  <h2 id="your-content">Your content</h2>
+  <p>“Your content” means what you upload or send to the services: the sessions you share and their titles, your bug reports, and anything else you send.</p>
+  <p>You keep all ownership rights in your content. To run the services, you give us a worldwide, non-exclusive, royalty-free license to store, copy, transmit, display, and process your content. We use this license only to:</p>
+  <ul>
+    <li>store your content and show each share to the people its visibility setting allows</li>
+    <li>count views and run the other features you use</li>
+    <li>keep the services secure, moderate them, and meet legal obligations</li>
+    <li>for a bug report, find, reproduce, and fix bugs in pi-rust</li>
+  </ul>
+  <p>We may let the service providers that run the services for us, such as Cloudflare, use your content only for these purposes. We do not sell your content, and we do not use it to train AI models.</p>
+  <p>The license ends when we delete your content, except for copies that remain in our database provider’s restore history or in a bug report email, or that we keep for a legal obligation or a legal claim. For those copies, the license lasts only as long as we keep them for those purposes. Our <a href="/privacy/">privacy policy</a> says how long we keep each kind of data. Deletion does not recall copies that other people already made.</p>
+  <p>If you choose to send us an idea or a suggestion, we may use the idea without paying you or owing you anything. This does not let us publish your private shares, bug reports, personal information, or confidential code.</p>
+
+  <h2 id="your-responsibility">What you share is your responsibility</h2>
+  <p>A shared session holds everything in that session: your prompts, the AI model’s replies, code, file contents, and command output. A bug report can hold the full session too. Before you share a session or include it in a bug report, read it, and remove anything you do not want to send. You are solely responsible for your content and for the decision to share it, including:</p>
+  <ul>
+    <li><strong>Secrets.</strong> API keys, tokens, passwords, private keys, and other credentials. If you share one by mistake, delete the share and change the secret at once. Deleting a share does not undo a copy someone already made.</li>
+    <li><strong>Other people’s personal data.</strong> Share it only when you have the right to.</li>
+    <li><strong>Code and information that is not yours.</strong> Your employer’s or client’s code and confidential information, and other third-party content. Share it only when you have the right to.</li>
+    <li><strong>Sensitive information.</strong> Do not share or upload financial account credentials, government ID numbers, health records, or other sensitive personal information. Use a redacted example instead.</li>
+    <li><strong>AI output.</strong> Output from AI models can be wrong, unsafe, or include material that belongs to someone else. You are responsible for checking it before you share it or rely on it.</li>
+  </ul>
+  <p>When a share is set to anyone with the link, anyone who has the link can open it, download it, and pass it on. Chat apps that preview the link show its title. We ask search engines and AI crawlers not to index or fetch shares, but we cannot make every crawler or person follow that request. We are not responsible for what others do with content you share or with a link you give out.</p>
+  <p>You confirm that you have all the rights and permissions needed to upload your content and to give us the license above, and that your content and your use of the services do not violate any law, any contract you are bound by, or anyone else’s rights.</p>
+
+  <h2 id="acceptable-use">Acceptable use</h2>
+  <p>Do not use the services to:</p>
+  <ul>
+    <li>break any law, or help anyone else break one</li>
+    <li>upload or share content that infringes anyone’s copyright, trademark, trade secret, privacy, or other rights</li>
+    <li>exploit a child, solicit a child for sexual activity, or upload or share sexual material involving a child. When we learn of facts that indicate an apparent offense that federal law requires us to report, we report them to the CyberTipline of the National Center for Missing &amp; Exploited Children as soon as reasonably possible, restrict access to the material, and preserve it as the law requires.</li>
+    <li>harass, threaten, defame, or impersonate anyone, or share content that promotes violence against people</li>
+    <li>spread malware, phishing pages, or other harmful code, or use a share to attack the people who open it</li>
+    <li>host files or pages that are not sessions from pi-rust or pi, or use the services as general file storage or web hosting</li>
+    <li>send spam, or use the services to advertise</li>
+    <li>get around rate limits, size limits, suspension, access controls, or other security measures</li>
+    <li>access another person’s account or private shares, or try to</li>
+    <li>probe, scan, or test the services for vulnerabilities, or put an unreasonable load on them, without our written permission</li>
+    <li>send automated requests, except those the pi-rust app makes in normal use</li>
+    <li>interfere with the services or with anyone else’s use of them</li>
+  </ul>
+  <p><strong>Report harmful content.</strong> Email <a href={`mailto:${LEGAL_EMAIL}`}>{LEGAL_EMAIL}</a> with the link to the share, or enough information for us to find it. Do not attach the harmful material. If an intimate image of you was shared without your consent, you or someone authorized to act for you can ask us to remove it. Include your physical or electronic signature, your contact details, where we can find the image, a statement that you believe in good faith that it was shared without your consent, and any facts that support your request. We act on valid requests as soon as possible. For copyright, use the process under <a href="#copyright">Copyright and DMCA</a>.</p>
+
+  <h2 id="moderation">Moderation, suspension, and deletion</h2>
+  <p>We decide what the services host. At our discretion, we and our admins may remove any content, make a share private, refuse or delete a bug report, limit your use of the services, or suspend or delete your account. We may act at any time and without advance notice, for example to enforce these Terms, to respond to a complaint or a legal request, or to protect you, other people, or the services. We give notice when the law requires it.</p>
+  <p>We do not routinely screen uploads, and we have no duty to review content unless the law requires it. We may review content after a report, and we preserve, report, or remove material when the law requires it. When we leave content up, we do not approve of it or take responsibility for it.</p>
+  <p>When we suspend an account, it cannot sign in, its pi CLI tokens stop working, and its shares stop opening. When we delete an account, we delete its shares. We do not owe you a copy of any content we remove or delete. Download what you want to keep from your <a href="/account/">Shares page</a> while you can.</p>
+
+  <h2 id="free-service">A free service without support or backups</h2>
+  <p>We charge nothing for the services. Because they are free:</p>
+  <ul>
+    <li>We do not promise technical support. We handle privacy requests, copyright notices, and other legal notices as described in these Terms and the privacy policy, or as the law requires.</li>
+    <li>We do not promise any level of availability or speed, and the services can be down or slow at any time.</li>
+    <li>We keep no backups for you. Content can be lost, and when it is, we do not have to recover it. Keep your own copy of anything you upload.</li>
+    <li>We set limits, such as the size of a share and how many requests one client can send, and we can change them at any time.</li>
+  </ul>
+
+  <h2 id="changes-to-services">Changes to the services</h2>
+  <p>We may change, add, or remove any feature, or suspend or stop all or part of the services, temporarily or for good, at any time, with or without notice. We are not liable to you for any of these changes.</p>
+
+  <h2 id="open-source">Open-source software and website code</h2>
+  <p>The pi-rust software is open source under the MIT license, at <a href={REPO_URL} rel="noopener">{REPO_URL.replace('https://', '')}</a>. The source code of this website is also open source under the MIT license, at <a href={SITE_REPO_URL} rel="noopener">{SITE_REPO_URL.replace('https://', '')}</a>. These Terms govern only your use of the services that we host at pi-rust.com. The MIT licenses govern your use of the code, including its own disclaimer of warranties and limitation of liability, and nothing in these Terms takes away a right that an MIT license gives you.</p>
+  <p>Anyone may run a copy of this website or of the services, or point the pi-rust app at another server. Those copies and servers are not ours. We do not run, control, or support them, these Terms do not cover them, and we are not responsible for them.</p>
+  <p>pi-rust is a port of <a href={UPSTREAM_PI_URL} rel="noopener">pi</a>, a separate project by {UPSTREAM_AUTHOR.name}. We do not run upstream pi or pi.dev, and these Terms do not cover them.</p>
+
+  <h2 id="third-parties">Third-party services</h2>
+  <p>The services and the pi-rust app work with services that other companies run. We do not control them, and we are not responsible for them. When you use a model provider or GitHub, its terms apply to that use. Cloudflare provides hosting and other services to us.</p>
+  <ul>
+    <li><strong>Model providers.</strong> The pi-rust app sends your prompts and code to the AI model providers you choose, with your own account and keys. Their terms and charges apply to you. The model catalog can be incomplete or out of date, so check model details with your provider.</li>
+    <li><strong>GitHub.</strong> The session viewer loads gists from GitHub, and pi-rust’s releases, issues, and source code are on GitHub. <a href="https://docs.github.com/site-policy/github-terms/github-terms-of-service" rel="noopener">GitHub’s terms</a> apply.</li>
+    <li><strong>Cloudflare.</strong> Cloudflare hosts the services and runs their database, file storage, and email. When Cloudflare has a problem, the services can stop working or lose data.</li>
+  </ul>
+  <p>Links to other websites are for convenience. We do not endorse those websites, and we are not responsible for them.</p>
+
+  <h2 id="privacy">Privacy</h2>
+  <p>Our <a href="/privacy/">privacy policy</a> describes how we collect, use, and keep personal information. It describes our practices, and it is not part of these Terms.</p>
+
+  <h2 id="copyright">Copyright and DMCA</h2>
+  <p>We respond to notices of claimed copyright infringement that follow the Digital Millennium Copyright Act (17 U.S.C. 512). We act promptly to remove or disable access to material when we get a notice that substantially meets the requirements below, or when we otherwise learn of infringement that calls for removal. If a notice identifies the work and the material and tells us how to reach the sender, but lacks other required information, we promptly try to help the sender complete it. When we take down material in a share, we take reasonable steps to tell the owner of the account promptly.</p>
+  <p>A session that the <a href="/session/">session viewer</a> shows is stored on GitHub, not on pi-rust.com. Contact GitHub to remove a gist. To report a link or reference on pi-rust.com, send our designated agent its location.</p>
+
+  <h3 id="copyright-notices">How to send a notice</h3>
+  <p>Send a written notice to our designated agent, below, with all of the following:</p>
+  <ol>
+    <li>Your physical or electronic signature, as the copyright owner or a person authorized to act for the owner.</li>
+    <li>The copyrighted work you claim is infringed, or, if the notice covers several works at one site, a representative list of them.</li>
+    <li>The material you claim infringes, and information that lets us find it, such as the link to the share.</li>
+    <li>Information that lets us contact you, such as your address, telephone number, and email address.</li>
+    <li>A statement that you have a good-faith belief that the use of the material is not authorized by the copyright owner, its agent, or the law.</li>
+    <li>A statement that the information in your notice is accurate, and, under penalty of perjury, that you are authorized to act for the owner of the right that you claim is infringed.</li>
+  </ol>
+  <p>Our designated agent to receive notices of claimed infringement is:</p>
+  <address class="terms-address">
+    {OPERATOR.name}<br />
+    {OPERATOR.street}<br />
+    {OPERATOR.city}<br />
+    Phone: <a href={PHONE_LINK}>{OPERATOR.phone}</a><br />
+    Email: <a href={`mailto:${LEGAL_EMAIL}`}>{LEGAL_EMAIL}</a>
+  </address>
+  <p>Notices sent to other addresses may not be effective. Under 17 U.S.C. 512(f), a person who knowingly and materially misrepresents that material infringes, or that it was removed by mistake, can be liable for damages.</p>
+
+  <h3 id="counter-notices">How to send a counter notice</h3>
+  <p>If we removed your content after a notice and you believe it was removed by mistake or misidentification, send our designated agent a written counter notice with all of the following:</p>
+  <ol>
+    <li>Your physical or electronic signature.</li>
+    <li>The material that was removed or disabled, and where it appeared before, such as the link to the share.</li>
+    <li>A statement under penalty of perjury that you have a good-faith belief that the material was removed or disabled as a result of mistake or misidentification.</li>
+    <li>Your name, address, and telephone number.</li>
+    <li>A statement that you consent to the jurisdiction of the federal district court for the judicial district where your address is, or, if your address is outside the United States, any judicial district in which we may be found, and that you will accept service of process from the person who sent the notice or that person’s agent.</li>
+  </ol>
+  <p>When we get a valid counter notice, we promptly send a copy, with the contact details in it, to the person who sent the original notice, and tell that person that we will restore the material in 10 business days. We restore it no less than 10 and no more than 14 business days after we get the counter notice, unless our designated agent first gets notice that the person has filed a court action to stop the claimed infringement, or has started a proceeding about it before the Copyright Claims Board. Restoring does not bring back a share that its owner deleted or extend a share that expired. We may keep material down for a reason under these Terms other than the copyright notice.</p>
+
+  <h3 id="repeat-infringers">Repeat infringers</h3>
+  <p>We end the accounts of repeat copyright infringers in appropriate circumstances. We decide from the notices, the counter notices, and other reliable information we have, and we may act after a single notice when the infringement is clear or deliberate. We accommodate and do not interfere with standard technical measures, as copyright law defines them.</p>
+
+  <h2 id="warranties">Disclaimer of warranties</h2>
+  <p><strong>The services are provided “as is” and “as available”, with all faults, and you use them at your own risk.</strong></p>
+  <p><strong>To the fullest extent the law allows, we disclaim all warranties and conditions, whether express, implied, or statutory, including the implied warranties of merchantability, fitness for a particular purpose, title, and non-infringement, and any warranty that arises from a course of dealing or usage of trade.</strong></p>
+  <p><strong>We do not warrant that the services will be available, uninterrupted, timely, secure, or free of errors or harmful code; that content will always be available or not lost; that a security measure will prevent every unauthorized access; that the model catalog, the documentation, or any other content is accurate, complete, or current; or that we will fix any defect.</strong></p>
+  <p>No advice or information that you get from us, from an admin, or through the services creates a warranty that these Terms do not state. If the law does not let us disclaim an implied warranty, that warranty lasts only for the shortest period the law allows.</p>
+
+  <h2 id="liability">Limitation of liability</h2>
+  <p><strong>To the fullest extent the law allows, we are not liable to you for any indirect, incidental, special, consequential, exemplary, or punitive damages, or for any loss of profits, revenue, business, goodwill, or data, or for the cost of substitute services, that arise out of or relate to these Terms or the services.</strong></p>
+  <p><strong>To the fullest extent the law allows, we are not liable for any damages that arise from: content that you or others upload or share, including secrets, code, or personal data that become exposed; the loss or deletion of shares, bug reports, or accounts; the services being unavailable, slow, or wrong, including the model catalog; access to your account or content by anyone you did not authorize; or the acts of other users, AI models, model providers, GitHub, Cloudflare, or any other third party.</strong></p>
+  <p><strong>Our total liability to you for all claims that arise out of or relate to these Terms or the services, together, is limited to US$100.</strong></p>
+  <p><strong>These limits apply to every theory of liability, including contract, warranty, tort (including our own negligence), strict liability, and statute. They apply even if we were told that the damages were possible, and even if a limited remedy fails of its essential purpose.</strong></p>
+  <p>Nothing in these Terms limits or excludes our liability for our gross negligence, willful misconduct, or fraud, or any other liability that the law does not allow to be limited or excluded.</p>
+  <p>These limits are part of the basis on which we offer the services for free. The disclaimer of warranties and these limits also protect the admins we appoint and anyone who helps us run the services, and they may enforce them. The indemnity below protects us and our admins.</p>
+
+  <h2 id="no-relationship">No relationship or other duties</h2>
+  <p>These Terms do not create a partnership, joint venture, agency, employment, franchise, or fiduciary relationship between you and us, or any other relationship except the one these Terms state. Neither of us can bind the other.</p>
+  <p>We take on no duties beyond those that these Terms state or the law imposes. We have no duty to provide support, updates, maintenance, security fixes, or new features for the services or for pi-rust, to keep the services running, or to keep your content. This is true even if we have done any of these before.</p>
+  <p>Except as the <a href="#liability">Limitation of liability</a> section says for admins and those who help us, no one else has rights under these Terms.</p>
+
+  <h2 id="indemnity">Indemnity</h2>
+  <p>You will defend, indemnify, and hold harmless us and the admins we appoint from and against any claim made by a third party, and any resulting loss, liability, damages, fine, settlement, cost, and reasonable attorneys’ fees, that arises out of or relates to your content, your misuse of the services, your breach of these Terms, or your violation of any law or of anyone else’s rights. This does not cover a claim to the extent our own negligence or misconduct, or an admin’s, caused it.</p>
+  <p>We will tell you promptly about a claim. A delay excuses you only to the extent it harms your defense. We may take control of the defense, and you will cooperate with us. Neither of us may settle a claim in a way that binds the other without the other’s written consent, which neither of us will unreasonably withhold.</p>
+
+  <h2 id="disputes">Disputes</h2>
+
+  <h3 id="courts">Law and courts</h3>
+  <p>The law of the State of New York governs these Terms and any dispute that arises out of or relates to them or the services, without regard to its conflict-of-law rules. Federal law also applies where it governs, such as copyright law. The United Nations Convention on Contracts for the International Sale of Goods does not apply.</p>
+  <p>Any such dispute must be brought only in the state courts located in Westchester County, New York, or in the United States District Court for the Southern District of New York, at its White Plains courthouse where the court’s rules allow. You and we consent to the personal jurisdiction of these courts, and waive any objection to bringing a dispute there, including that the court is an inconvenient forum.</p>
+  <p>There are two exceptions. Either of us may bring a qualifying individual claim in a small claims court in Westchester County, New York, that can hear it. A <a href="#counter-notices">counter notice</a> includes the consent to jurisdiction that copyright law requires. Nothing in these Terms overrides a law that gives you a right to a different court, or protections under the law where you live, that cannot be waived by contract.</p>
+
+  <h3 id="jury-waiver">Jury trial waiver</h3>
+  <p><strong>You and we each knowingly and voluntarily waive any right to a trial by jury in any dispute that arises out of or relates to these Terms or the services. Where this waiver is enforceable, a judge will decide the dispute.</strong></p>
+
+  <h3 id="individual-claims">Individual claims only</h3>
+  <p><strong>To the fullest extent the law allows, you and we may bring claims against each other only individually, and not as a plaintiff or class member in a class, collective, or representative action.</strong> This does not prevent either of us from contacting a regulator, or from seeking a remedy that the law does not allow to be waived. If a court will not enforce this section for a claim, that claim may go forward as the law allows.</p>
+
+  <h3 id="time-limit">One year to bring a claim</h3>
+  <p><strong>You and we must file any claim that arises out of or relates to these Terms or the services within one year after the claim arises. A claim filed later is permanently barred.</strong> If this deadline cannot lawfully apply to a claim, the time that the law allows applies to it. This section does not prevent a report to a regulator.</p>
+
+  <h2 id="changes">Changes to these Terms</h2>
+  <p>We may change these Terms. We post every change on this page and update the effective date at the top.</p>
+  <p>For a material change, we post the new Terms and email account holders a summary, a link, and the date the change takes effect. That date is at least 30 days after we both post the change and send the email. A change that does not change anyone’s rights or duties, such as a correction, takes effect when we post it.</p>
+  <p>If you keep using the services after a change takes effect, you accept the changed Terms. If you do not agree to a change, stop using the services before it takes effect. You may still sign in to download your content or delete your account without accepting the change.</p>
+  <p>A change does not apply to a claim based on events before the change took effect. The Terms that applied when those events happened govern that claim.</p>
+
+  <h2 id="termination">Termination and survival</h2>
+  <p>You may stop using the services at any time. To end your account, delete it on your <a href="/account/settings/">Account page</a>.</p>
+  <p>We may end your access to any or all of the services as <a href="#moderation">Moderation, suspension, and deletion</a> describes. We may also stop offering the services at any time.</p>
+  <p>When these Terms end, your right to use the services ends. The sections on your content (for copies that remain), your responsibility, the disclaimer of warranties, the limitation of liability, no relationship or other duties, indemnity, disputes, assignment, notices, and the general terms continue to apply.</p>
+
+  <h2 id="assignment">Assignment</h2>
+  <p>We may assign or transfer these Terms, and any of our rights and obligations under them, in whole or in part, without your consent. This includes a transfer to anyone who takes over the services, if they agree to take on our obligations under these Terms. We will notify account holders before we transfer their data. After the transfer, the new party takes our place under these Terms, and we have no obligations under them that arise after the transfer. The transfer does not reduce rights that the law gives you. We may also have others perform services for us.</p>
+  <p>You may not assign or transfer these Terms, your account, or your rights or obligations under them without our written consent. Any attempt to do so without consent is void.</p>
+
+  <h2 id="notices">Notices and electronic communications</h2>
+  <p>We may send routine notices to the email address on your account, or post them on the site. For a material change to these Terms, we follow the process under <a href="#changes">Changes to these Terms</a>. For a notice that the law governs, we follow that law. Keep your email address current.</p>
+  <p>Send legal notices to us by email at <a href={`mailto:${LEGAL_EMAIL}`}>{LEGAL_EMAIL}</a> or by mail to the address in <a href="#contact">Contact</a>. Copyright notices go to our <a href="#copyright-notices">designated agent</a>.</p>
+  <p>You agree to do business with us electronically. You may accept these Terms electronically, and they and your acceptance are electronic records. This does not replace a notice method or a separate consent that the law requires.</p>
+
+  <h2 id="export">Export and sanctions</h2>
+  <p>You may not use the services if you are located in, or ordinarily resident in, a country or region that is subject to comprehensive United States sanctions, or if you are on, or owned or controlled by someone on, a United States government list of restricted parties, such as the Specially Designated Nationals list. You will comply with all export control and sanctions laws that apply to your use of the services.</p>
+
+  <h2 id="california">California notice</h2>
+  <p>The services are free. California users can send a complaint about the services to <a href={`mailto:${LEGAL_EMAIL}`}>{LEGAL_EMAIL}</a>, or write to us at the address under <a href="#contact">Contact</a>.</p>
+
+  <h2 id="general">General terms</h2>
+  <ul>
+    <li><strong>Entire agreement.</strong> These Terms are the entire agreement between you and us about the services. They replace any earlier agreement or statement about them.</li>
+    <li><strong>Severability.</strong> If a court finds any part of these Terms unenforceable, that part is enforced to the fullest extent the law allows, and the rest of these Terms stay in effect.</li>
+    <li><strong>No waiver.</strong> If we do not enforce a part of these Terms, we have not waived our right to enforce it later. A waiver counts only if we make it in writing.</li>
+    <li><strong>Events beyond our control.</strong> We are not liable for any delay or failure caused by events beyond our reasonable control, such as an outage of a service provider, an attack, a natural disaster, or an act of government.</li>
+    <li><strong>Headings and examples.</strong> Headings help you find a section. “Including” and “for example” introduce examples, which do not limit a general rule.</li>
+    <li><strong>Rights we keep.</strong> We keep all rights that these Terms and the MIT licenses do not expressly give you.</li>
+  </ul>
+
+  <h2 id="contact">Contact</h2>
+  <p>Email <a href={`mailto:${LEGAL_EMAIL}`}>{LEGAL_EMAIL}</a> with any question about these Terms. For privacy questions and requests, email <a href={`mailto:${PRIVACY_EMAIL}`}>{PRIVACY_EMAIL}</a>.</p>
+  <address class="terms-address">
+    {OPERATOR.name}<br />
+    {OPERATOR.street}<br />
+    {OPERATOR.city}<br />
+    Phone: <a href={PHONE_LINK}>{OPERATOR.phone}</a>
+  </address>
+</Docs>
+
+<style>
+  .terms-date {
+    max-width: var(--measure);
+    margin-top: 20px;
+    color: var(--graphite);
+    font-size: var(--t-14);
+  }
+
+  .terms-address {
+    font-style: normal;
+  }
+</style>

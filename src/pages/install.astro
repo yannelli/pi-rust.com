@@ -1,0 +1,72 @@
+---
+import Markdown from '../components/Markdown.astro';
+import { getEntry, render } from 'astro:content';
+import Docs from '../layouts/Docs.astro';
+import InstallPicker from '../components/InstallPicker.astro';
+import { RELEASE, RELEASES_URL } from '../lib/site';
+import upstream from '../data/upstream.json';
+
+const doc = (await getEntry('docs', 'install'))!;
+const { Content, headings } = await render(doc);
+
+const description =
+  'Install pi-rust on macOS, Linux, or Windows with one command, or with Homebrew. The script verifies the download before it installs.';
+
+const archives = upstream.assets.filter((asset) => /^pi-v.*\.(tar\.gz|zip)$/.test(asset.name));
+const target = (name: string) => name.replace(/^pi-v[\d.]+-/, '').replace(/\.(tar\.gz|zip)$/, '');
+const size = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+---
+
+<Docs
+  title="Install pi-rust"
+  description={description}
+  group="Get started"
+  source={doc.data.source}
+  sourceRef={doc.data.ref}
+  headings={[{ depth: 2, slug: 'downloads', text: `Downloads for ${RELEASE.tag}` }, ...headings]}
+  image="/og/install.png"
+>
+  <div slot="before" class="install-top">
+    <InstallPicker />
+    <p class="install-note">Then run <code>pi</code> in a project and log in with <code>/login</code>.</p>
+  </div>
+
+  <h2 id="downloads">Downloads for {RELEASE.tag}</h2>
+  <p>
+    Each archive holds the <code>pi</code> binary. Checksums are in <a href={`${RELEASES_URL}/download/${RELEASE.tag}/SHA256SUMS`}>SHA256SUMS</a>.
+  </p>
+  <div class="table">
+    <table>
+      <thead><tr><th>Target</th><th>Archive</th><th>Size</th></tr></thead>
+      <tbody>
+        {archives.map((asset) => (
+          <tr><td class="nowrap"><code>{target(asset.name)}</code></td><td><a href={asset.url}>{asset.name}</a></td><td class="nowrap">{size(asset.size)}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <Markdown entry={doc}><Content /></Markdown>
+</Docs>
+
+<style>
+  .install-top {
+    display: grid;
+    gap: 16px;
+    margin-top: 28px;
+  }
+
+  .install-note {
+    max-width: var(--measure);
+    color: var(--graphite);
+    font-size: var(--t-14);
+  }
+
+  .install-note code {
+    color: var(--ink);
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+</style>

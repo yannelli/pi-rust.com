@@ -1,0 +1,536 @@
+---
+/**
+ * Site search on the static Pagefind index. Opens with "/", Ctrl+K, or ⌘K,
+ * and from the header button. Results are grouped by page, and each row links
+ * to the section that matched. Arrow keys move through rows; Enter opens one.
+ */
+const SUGGESTIONS = ['--mode rpc', '/undo', 'OpenRouter', 'extensionRuntime', 'MCP'];
+---
+
+<dialog class="search" data-search aria-label="Search pi-rust docs">
+  <div class="search__panel">
+    <div class="search__field">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m21 21-4.3-4.3M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z" /></svg>
+      <input
+        type="search"
+        placeholder="Search the docs, changelog, and FAQ"
+        autocomplete="off"
+        spellcheck="false"
+        role="combobox"
+        aria-expanded="false"
+        aria-controls="search-results"
+        aria-autocomplete="list"
+        data-search-input
+      />
+      <button type="button" class="search__close" data-search-close aria-label="Close search"><kbd>Esc</kbd></button>
+    </div>
+
+    <div class="search__body">
+      <div class="search__start" data-search-start>
+        <p class="search__label">Try</p>
+        <div class="search__chips">
+          {SUGGESTIONS.map((term) => <button type="button" data-search-suggest={term}>{term}</button>)}
+        </div>
+      </div>
+      <ul id="search-results" class="search__results" role="listbox" aria-label="Results" data-search-results></ul>
+      <div class="search__empty" data-search-empty hidden>
+        <p>No results for “<span data-search-term></span>”.</p>
+        <p>Try a shorter word, or <a data-search-github href="https://github.com/yannelli/pi-rust/search">search the repository on GitHub</a>.</p>
+      </div>
+    </div>
+
+    <footer class="search__foot" aria-hidden="true">
+      <span><kbd>↑</kbd><kbd>↓</kbd> to select</span>
+      <span><kbd>↵</kbd> to open</span>
+      <span><kbd>Esc</kbd> to close</span>
+    </footer>
+  </div>
+</dialog>
+
+<script>
+  type Sub = { title: string; url: string; excerpt: string; locations?: number[] };
+  type Result = { url: string; meta: { title?: string }; excerpt: string; sub_results?: Sub[] };
+  type Pagefind = {
+    search: (query: string) => Promise<{ results: { data: () => Promise<Result> }[] }>;
+    preload?: (query: string) => void;
+  };
+
+  const PAGES = 6;
+  const ROWS_PER_PAGE = 3;
+  const ICON_PAGE =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
+  const ICON_SECTION = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/></svg>';
+  const ICON_ENTER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5v7a3 3 0 0 1-3 3H5m4-4-4 4 4 4"/></svg>';
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-search]')!;
+  const input = dialog.querySelector<HTMLInputElement>('[data-search-input]')!;
+  const list = dialog.querySelector<HTMLUListElement>('[data-search-results]')!;
+  const start = dialog.querySelector<HTMLElement>('[data-search-start]')!;
+  const empty = dialog.querySelector<HTMLElement>('[data-search-empty]')!;
+  let pagefind: Pagefind | null = null;
+  let active = -1;
+  let ticket = 0;
+
+  async function load() {
+    if (!pagefind) {
+      const path = '/pagefind/pagefind.js';
+      pagefind = (await import(/* @vite-ignore */ path)) as Pagefind;
+    }
+    return pagefind;
+  }
+
+  function open() {
+    if (dialog.open) return;
+    dialog.showModal();
+    input.select();
+    load();
+  }
+
+  /** Which part of the site a page is in, from its path. */
+  function section(url: string) {
+    if (url.startsWith('/docs/')) return 'Docs';
+    if (url.startsWith('/changelog')) return 'Changelog';
+    if (url.startsWith('/faq')) return 'FAQ';
+    if (url.startsWith('/install')) return 'Install';
+    if (url.startsWith('/benchmarks')) return 'Benchmarks';
+    return 'pi-rust';
+  }
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, className: string, html?: string) {
+    const node = document.createElement(tag);
+    node.className = className;
+    if (html !== undefined) node.innerHTML = html;
+    return node;
+  }
+
+  /** The sections of a page that matched most, best first. Pagefind's excerpts are escaped, with <mark> around hits. */
+  function rows(result: Result): Sub[] {
+    const subs = (result.sub_results ?? []).filter((sub) => sub.excerpt);
+    const best = [...subs].sort((a, b) => (b.locations?.length ?? 0) - (a.locations?.length ?? 0)).slice(0, ROWS_PER_PAGE);
+    return best.length ? best : [{ title: result.meta.title ?? result.url, url: result.url, excerpt: result.excerpt }];
+  }
+
+  function setActive(index: number) {
+    const items = [...list.querySelectorAll<HTMLAnchorElement>('[role="option"]')];
+    if (!items.length) return;
+    active = (index + items.length) % items.length;
+    items.forEach((item, i) => item.setAttribute('aria-selected', String(i === active)));
+    items[active].scrollIntoView({ block: 'nearest' });
+    input.setAttribute('aria-activedescendant', items[active].id);
+  }
+
+  function render(results: Result[]) {
+    let count = 0;
+    const groups = results.map((result) => {
+      const pageTitle = result.meta.title ?? result.url;
+      const group = el('li', 'search__group');
+      group.setAttribute('role', 'presentation');
+      const head = el('div', 'search__group-head');
+      head.append(el('span', 'search__group-title', ''), el('span', 'search__tag', ''));
+      head.children[0].textContent = pageTitle;
+      head.children[1].textContent = section(result.url);
+      const options = el('ul', 'search__options');
+      options.setAttribute('role', 'group');
+      options.setAttribute('aria-label', pageTitle);
+      for (const sub of rows(result)) {
+        const isPage = !sub.url.includes('#') || sub.title === pageTitle;
+        const li = el('li', '');
+        li.setAttribute('role', 'presentation');
+        const a = el('a', 'search__option');
+        a.href = sub.url;
+        a.id = `search-result-${count++}`;
+        a.setAttribute('role', 'option');
+        const text = el('span', 'search__text');
+        const title = el('span', 'search__title');
+        title.textContent = isPage ? pageTitle : sub.title;
+        text.append(title, el('span', 'search__excerpt', sub.excerpt));
+        a.append(el('span', 'search__icon', isPage ? ICON_PAGE : ICON_SECTION), text, el('span', 'search__enter', ICON_ENTER));
+        a.addEventListener('mousemove', () => {
+          const index = Number(a.id.split('-').pop());
+          if (index !== active) setActive(index);
+        });
+        li.append(a);
+        options.append(li);
+      }
+      group.append(head, options);
+      return group;
+    });
+    list.replaceChildren(...groups);
+    return count;
+  }
+
+  async function run() {
+    const query = input.value.trim();
+    const mine = ++ticket;
+    if (!query) {
+      list.replaceChildren();
+      start.hidden = false;
+      empty.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      return;
+    }
+    const engine = await load();
+    const found = await engine.search(query);
+    const data = await Promise.all(found.results.slice(0, PAGES).map((r) => r.data()));
+    if (mine !== ticket) return;
+    start.hidden = true;
+    const count = render(data);
+    empty.hidden = count > 0;
+    if (!count) {
+      empty.querySelector('[data-search-term]')!.textContent = query;
+      empty.querySelector<HTMLAnchorElement>('[data-search-github]')!.href =
+        `https://github.com/yannelli/pi-rust/search?q=${encodeURIComponent(query)}&type=code`;
+    }
+    input.setAttribute('aria-expanded', String(count > 0));
+    active = -1;
+    if (count) setActive(0);
+  }
+
+  document.addEventListener('keydown', (event) => {
+    const target = event.target as HTMLElement;
+    const typing = target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
+    if ((event.key === '/' && !typing) || (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey))) {
+      event.preventDefault();
+      open();
+    }
+  });
+
+  document.querySelectorAll('[data-search-open]').forEach((button) => button.addEventListener('click', open));
+  dialog.querySelector('[data-search-close]')?.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+  dialog.querySelectorAll<HTMLButtonElement>('[data-search-suggest]').forEach((chip) =>
+    chip.addEventListener('click', () => {
+      input.value = chip.dataset.searchSuggest!;
+      input.focus();
+      run();
+    })
+  );
+  input.addEventListener('input', run);
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setActive(active + 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setActive(active - 1);
+    } else if (event.key === 'Enter') {
+      const item = list.querySelectorAll<HTMLAnchorElement>('[role="option"]')[active];
+      if (item) {
+        event.preventDefault();
+        window.location.href = item.href;
+      }
+    }
+  });
+</script>
+
+<style is:global>
+  /* Global, but every rule starts at .search: the results are built in the browser, where scoped styles don't reach. */
+  .search {
+    width: min(680px, calc(100vw - 24px));
+    max-height: min(72vh, 640px);
+    margin: 12vh auto auto;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.06),
+      0 24px 64px rgb(0 0 0 / 0.22);
+  }
+
+  .search[open] {
+    animation: search-in 140ms ease-out;
+  }
+
+  @keyframes search-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .search[open] {
+      animation: none;
+    }
+  }
+
+  .search::backdrop {
+    background: rgb(0 0 0 / 0.36);
+    backdrop-filter: blur(3px);
+  }
+
+  .search__panel {
+    display: flex;
+    flex-direction: column;
+    max-height: inherit;
+  }
+
+  .search__field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 14px 0 18px;
+    min-height: 58px;
+    border-bottom: 1px solid var(--hairline);
+    color: var(--muted);
+  }
+
+  .search__field input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--t-16);
+    outline: none;
+  }
+
+  .search__field input::placeholder {
+    color: var(--muted);
+  }
+
+  .search__field input::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  .search__close {
+    display: grid;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .search__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .search__start {
+    padding: 16px 18px 18px;
+  }
+
+  .search__label {
+    margin-bottom: 10px;
+    color: var(--muted);
+    font-size: var(--t-13);
+  }
+
+  .search__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .search__chips button {
+    padding: 6px 12px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--hover);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    color: var(--graphite);
+    font-family: var(--mono);
+    font-size: var(--t-13);
+    cursor: pointer;
+  }
+
+  .search__chips button:hover {
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--hairline-strong);
+  }
+
+  .search__results {
+    margin: 0;
+    padding: 6px 8px 10px;
+    list-style: none;
+  }
+
+  .search__results:empty {
+    display: none;
+  }
+
+  .search__group + .search__group {
+    margin-top: 6px;
+  }
+
+  .search__group-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 10px 6px;
+  }
+
+  .search__group-title {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: var(--t-13);
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .search__tag {
+    flex: none;
+    margin-left: auto;
+    padding: 1px 8px;
+    border-radius: var(--r-pill);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    color: var(--muted);
+    font-size: 0.6875rem;
+    line-height: 1.6;
+  }
+
+  .search__options {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .search__option {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) 18px;
+    align-items: start;
+    gap: 12px;
+    padding: 10px 12px 10px 10px;
+    border-radius: var(--r-md);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .search__option[aria-selected='true'] {
+    background: var(--hover);
+  }
+
+  .search__icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    color: var(--muted);
+  }
+
+  .search__icon svg,
+  .search__enter svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .search__option[aria-selected='true'] .search__icon {
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--hairline-strong);
+  }
+
+  .search__text {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .search__title {
+    overflow: hidden;
+    color: var(--ink);
+    font-size: var(--t-14);
+    font-weight: 500;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .search__excerpt {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: var(--t-13);
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .search__excerpt mark {
+    padding: 0 2px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--rust) 18%, transparent);
+    color: var(--ink);
+  }
+
+  .search__enter {
+    align-self: center;
+    color: var(--muted);
+    opacity: 0;
+  }
+
+  .search__option[aria-selected='true'] .search__enter {
+    opacity: 1;
+  }
+
+  .search__empty {
+    padding: 28px 18px 32px;
+    color: var(--muted);
+    font-size: var(--t-14);
+    text-align: center;
+  }
+
+  .search__empty p + p {
+    margin-top: 6px;
+    font-size: var(--t-13);
+  }
+
+  .search__empty span {
+    color: var(--ink);
+  }
+
+  .search__empty a {
+    color: var(--ink);
+    text-decoration-color: var(--hairline-strong);
+    text-underline-offset: 0.2em;
+  }
+
+  .search__foot {
+    display: flex;
+    gap: 18px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--hairline);
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
+  .search__foot span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .search__foot kbd + kbd {
+    margin-left: -2px;
+  }
+
+  @media (max-width: 600px) {
+    .search {
+      margin-top: 8px;
+      max-height: calc(100dvh - 16px);
+    }
+
+    .search__foot {
+      display: none;
+    }
+  }
+</style>

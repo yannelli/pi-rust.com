@@ -1,0 +1,57 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import Icon from '../../components/admin/Icon.astro';
+
+const FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'admins', label: 'Admins' },
+  { value: 'suspended', label: 'Suspended' },
+  { value: 'unverified', label: 'Unverified' },
+];
+---
+
+<Admin title="People" active="people" description="Every pi-rust.com account. Change who is an admin, suspend or restore an account, or delete it.">
+  <div class="toolbar">
+    <label class="find">
+      <Icon name="search" />
+      <span class="sr-only">Search accounts by email</span>
+      <input type="search" placeholder="Search by email" autocomplete="off" spellcheck="false" data-find />
+    </label>
+    <div class="filters" role="group" aria-label="Show">
+      {FILTERS.map(({ value, label }, index) => (
+        <button class="filter" type="button" aria-pressed={index === 0 ? 'true' : 'false'} data-filter={value}>{label}</button>
+      ))}
+    </div>
+  </div>
+
+  <section class="surface" aria-label="Accounts">
+    <ul class="rows" aria-busy="true" data-list>
+      <li class="rows__loading" aria-hidden="true"></li>
+    </ul>
+    <div class="surface__foot">
+      <span data-count></span>
+      <button class="btn btn--secondary btn--small" type="button" data-more hidden>Load more</button>
+    </div>
+  </section>
+
+  <dialog class="dialog" data-suspend aria-labelledby="suspend-title" aria-describedby="suspend-text">
+    <form method="dialog" novalidate data-suspend-form>
+      <div class="dialog__body">
+        <h2 id="suspend-title" data-suspend-title>Suspend account?</h2>
+        <p id="suspend-text">They are signed out everywhere, their CLI tokens stop working, and their shares stop opening. They can’t sign in until an admin restores the account.</p>
+        <div class="field">
+          <label for="suspend-reason">Reason <span class="field__hint">(optional, only admins see it)</span></label>
+          <textarea class="textarea" id="suspend-reason" name="reason" maxlength="500"></textarea>
+        </div>
+      </div>
+      <div class="dialog__foot">
+        <button class="btn btn--secondary" type="button" data-suspend-cancel>Cancel</button>
+        <button class="btn btn--danger-solid" type="submit">Suspend</button>
+      </div>
+    </form>
+  </dialog>
+</Admin>
+
+<script>
+  import '../../scripts/admin/people.ts';
+</script>

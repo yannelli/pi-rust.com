@@ -1,0 +1,4 @@
+# Local Worker variables and environment for wrangler dev; see docs/accounts.md.
+.dev.vars
+.dev.vars.*
+.env

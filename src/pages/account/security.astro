@@ -1,0 +1,122 @@
+---
+import Panel from '../../layouts/Panel.astro';
+---
+
+<Panel title="Security" active="security" description="Password, two-step verification, passkeys, and where your pi-rust account is signed in.">
+  <section class="section" aria-labelledby="password-title">
+    <div class="section__body">
+      <h2 id="password-title">Password</h2>
+      <p class="section__desc">Changing it signs you out of your other browser sessions.</p>
+      <form class="form" method="dialog" novalidate data-password-form hidden>
+        <div class="field">
+          <label for="new-password">New password</label>
+          <input class="input" id="new-password" name="password" type="password" autocomplete="new-password" minlength="10" maxlength="256" aria-describedby="new-password-hint new-password-error" required />
+          <p class="field__hint" id="new-password-hint">Use 10 or more characters.</p>
+          <p class="field__error" id="new-password-error" role="alert"></p>
+        </div>
+        <div class="actions actions--end">
+          <button class="btn btn--secondary" type="button" data-password-cancel>Cancel</button>
+          <button class="btn btn--primary" type="submit">Save password</button>
+        </div>
+      </form>
+    </div>
+    <div class="section__foot" data-password-foot>
+      <span></span>
+      <button class="btn btn--secondary btn--small" type="button" data-password-open>Change password</button>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="totp-title">
+    <div class="section__body">
+      <div class="section__title">
+        <h2 id="totp-title">Two-step verification</h2>
+        <span class="badge" data-totp-badge>Off</span>
+      </div>
+      <p class="section__desc">After your password, also ask for a code from an authenticator app.</p>
+
+      <div data-totp-setup hidden>
+        <p class="section__desc">Scan this QR code with your authenticator app, then enter the 6-digit code it shows.</p>
+        <div class="qr" data-totp-qr role="img" aria-label="QR code for your authenticator app"></div>
+        <p class="section__desc">Can’t scan it? Enter this key instead:</p>
+        <p class="secret" data-totp-secret></p>
+        <form class="form" id="totp-form" method="dialog" novalidate data-totp-form>
+          <div class="field">
+            <label for="totp-code">Code</label>
+            <input class="input input--code" id="totp-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" aria-describedby="totp-code-error" required />
+            <p class="field__error" id="totp-code-error" role="alert"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="section__foot">
+      <span data-totp-status></span>
+      <button class="btn btn--secondary btn--small" type="button" data-totp-on hidden>Turn on</button>
+      <button class="btn btn--danger btn--small" type="button" data-totp-off hidden>Turn off</button>
+      <div class="actions actions--end" data-totp-actions hidden>
+        <button class="btn btn--secondary btn--small" type="button" data-totp-cancel>Cancel</button>
+        <button class="btn btn--primary btn--small" type="submit" form="totp-form">Verify</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="codes-title" data-codes-section>
+    <div class="section__body">
+      <h2 id="codes-title">Recovery codes</h2>
+      <p class="section__desc">Use one to sign in when you can’t use your authenticator app or passkey. Each code works once.</p>
+      <div data-codes-new hidden>
+        <p class="section__desc"><strong>Save these codes now.</strong> They are shown only once.</p>
+        <ul class="codes" data-codes-list></ul>
+        <div class="actions actions--end">
+          <button class="btn btn--secondary btn--small" type="button" data-codes-copy>Copy codes</button>
+          <button class="btn btn--primary btn--small" type="button" data-codes-done>Done</button>
+        </div>
+      </div>
+    </div>
+    <div class="section__foot">
+      <span data-codes-status></span>
+      <button class="btn btn--secondary btn--small" type="button" data-codes-regenerate hidden>Get new codes</button>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="passkeys-title">
+    <div class="section__body">
+      <h2 id="passkeys-title">Passkeys</h2>
+      <p class="section__desc">Sign in with your fingerprint, face, or screen lock instead of a password. A passkey also counts as a second step after your password.</p>
+      <ul class="list" aria-busy="true" data-passkeys>
+        <li class="list__loading" aria-hidden="true"></li>
+      </ul>
+    </div>
+    <div class="section__foot">
+      <span data-passkey-support></span>
+      <button class="btn btn--secondary btn--small" type="button" data-passkey-add>Add a passkey</button>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="sessions-title">
+    <div class="section__body">
+      <h2 id="sessions-title">Browser sessions</h2>
+      <p class="section__desc">Where your account is signed in. A session ends after 30 days without use.</p>
+      <ul class="list" aria-busy="true" data-sessions>
+        <li class="list__loading" aria-hidden="true"></li>
+      </ul>
+    </div>
+    <div class="section__foot">
+      <span></span>
+      <button class="btn btn--secondary btn--small" type="button" data-sessions-others>Sign out of other sessions</button>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="tokens-title">
+    <div class="section__body">
+      <h2 id="tokens-title">CLI tokens</h2>
+      <p class="section__desc">Each pi CLI you approved has a token. Revoke one to sign that CLI out.</p>
+      <ul class="list" aria-busy="true" data-tokens>
+        <li class="list__loading" aria-hidden="true"></li>
+      </ul>
+    </div>
+  </section>
+</Panel>
+
+<script>
+  import '../../scripts/account/security.ts';
+</script>

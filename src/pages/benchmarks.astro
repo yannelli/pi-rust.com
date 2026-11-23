@@ -1,0 +1,26 @@
+---
+import Markdown from '../components/Markdown.astro';
+import { getEntry, render } from 'astro:content';
+import Docs from '../layouts/Docs.astro';
+import BenchmarkChart from '../components/BenchmarkChart.astro';
+import upstream from '../data/upstream.json';
+
+const page = (await getEntry('pages', 'benchmarks'))!;
+const { Content, headings } = await render(page);
+const [rust, node, codex] = upstream.benchmark.harnesses;
+const mib = (value: number) => Math.round(value).toLocaleString('en-US');
+
+const description = `In one run of 20 concurrent sessions on a 16 GB Mac, pi-rust peaked at ${mib(rust.peakMiB)} MiB in total, against ${mib(node.peakMiB)} MiB for Node pi and ${mib(codex.peakMiB)} MiB for Codex CLI.`;
+---
+
+<Docs title="Memory with 20 concurrent sessions" description={description} group="Benchmarks" source={page.data.source} headings={headings} image="/og/benchmarks.png">
+  <div slot="before" class="bench-top"><BenchmarkChart /></div>
+  <Markdown entry={page}><Content /></Markdown>
+</Docs>
+
+<style>
+  .bench-top {
+    max-width: 640px;
+    margin-top: 28px;
+  }
+</style>

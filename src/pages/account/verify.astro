@@ -1,0 +1,31 @@
+---
+import Auth from '../../layouts/Auth.astro';
+---
+
+<Auth title="Verify email" description="Verify the email address of your pi-rust account.">
+  <section data-step="working">
+    <h1>Verifying your email</h1>
+    <p class="card__lead">One moment.</p>
+  </section>
+
+  <section data-step="done" hidden>
+    <h1 data-focus>Email verified</h1>
+    <p class="card__lead">You can now share sessions and connect the pi CLI.</p>
+    <div class="actions actions--end">
+      <a class="btn btn--primary" href="/account/" data-continue>Continue</a>
+    </div>
+  </section>
+
+  <section data-step="failed" hidden>
+    <h1 data-focus>This link doesn’t work</h1>
+    <p class="card__lead" data-failed-reason>It has expired or was already used.</p>
+    <p class="card__lead">Sign in to send a new link from your account page.</p>
+    <div class="actions actions--end">
+      <a class="btn btn--primary" href="/account/settings/">Go to account</a>
+    </div>
+  </section>
+</Auth>
+
+<script>
+  import '../../scripts/account/verify.ts';
+</script>

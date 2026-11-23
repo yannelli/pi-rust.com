@@ -1,0 +1,33 @@
+---
+import Markdown from '../components/Markdown.astro';
+import { getEntry, render } from 'astro:content';
+import Docs from '../layouts/Docs.astro';
+import { RELEASE, RELEASES_URL, formatDate } from '../lib/site';
+
+const page = (await getEntry('pages', 'changelog'))!;
+const { Content, headings } = await render(page);
+// The page lists every release; "On this page" lists the latest twelve.
+const recent = headings.filter((h) => h.depth === 2).slice(0, 12);
+
+const description = `Every pi-rust release and what changed in it, newest first. The latest is ${RELEASE.tag}, released ${formatDate(RELEASE.date)}.`;
+---
+
+<Docs title="Changelog" description={description} group="Releases" source={page.data.source} headings={recent} image="/og/changelog.png">
+  <p slot="before" class="changelog-note">Downloads and checksums are on <a href={RELEASES_URL} rel="noopener">GitHub releases</a>.</p>
+  {/* One long page of commit messages: weigh it down so the docs rank first in search. */}
+  <div data-pagefind-weight="0.3"><Markdown entry={page}><Content /></Markdown></div>
+</Docs>
+
+<style>
+  .changelog-note {
+    max-width: var(--measure);
+    margin-top: 20px;
+    color: var(--graphite);
+  }
+
+  .changelog-note a {
+    color: var(--ink);
+    text-underline-offset: 0.2em;
+    text-decoration-color: var(--hairline-strong);
+  }
+</style>

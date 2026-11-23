@@ -1,0 +1,100 @@
+---
+import Auth from '../../layouts/Auth.astro';
+---
+
+<Auth title="Sign in" description="Sign in to your pi-rust account to manage shared sessions and the pi CLI.">
+  <section data-step="email">
+    <h1>Sign in</h1>
+    <p class="card__lead">Use your pi-rust account</p>
+    <p class="notice" data-notice hidden></p>
+    <form class="form" method="dialog" novalidate data-email-form>
+      <div class="field">
+        <label for="email">Email</label>
+        <input class="input" id="email" name="email" type="email" autocomplete="username" inputmode="email" spellcheck="false" aria-describedby="email-error" required autofocus />
+        <p class="field__error" id="email-error" role="alert"></p>
+      </div>
+      <div class="actions">
+        <a class="link-button" href="/account/sign-up/" data-keep-next>Create account</a>
+        <button class="btn btn--primary" type="submit">Next</button>
+      </div>
+    </form>
+    <div data-passkey-entry>
+      <p class="divider">or</p>
+      <button class="btn btn--secondary btn--block" type="button" data-passkey-sign-in>Sign in with a passkey</button>
+      <p class="notice notice--error" role="alert" data-passkey-error hidden></p>
+    </div>
+  </section>
+
+  <section data-step="password" hidden>
+    <h1>Welcome</h1>
+    <button class="chip" type="button" data-back-to-email aria-label="Change email"><span data-email-chip></span></button>
+    <form class="form" method="dialog" novalidate data-password-form>
+      <input class="sr-only" name="username" type="email" autocomplete="username" tabindex="-1" aria-hidden="true" readonly />
+      <div class="field">
+        <label for="password">Password</label>
+        <input class="input" id="password" name="password" type="password" autocomplete="current-password" aria-describedby="password-error" required />
+        <p class="field__error" id="password-error" role="alert"></p>
+      </div>
+      <label class="check"><input type="checkbox" data-show-password /> Show password</label>
+      <div class="actions">
+        <a class="link-button" href="/account/reset/">Forgot password?</a>
+        <button class="btn btn--primary" type="submit">Sign in</button>
+      </div>
+    </form>
+  </section>
+
+  <section data-step="totp" hidden>
+    <h1>Two-step verification</h1>
+    <p class="card__lead">Enter the 6-digit code from your authenticator app.</p>
+    <form class="form" method="dialog" novalidate data-totp-form>
+      <div class="field">
+        <label for="totp-code">Code</label>
+        <input class="input input--code" id="totp-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" pattern="[0-9 ]*" aria-describedby="totp-code-error" required />
+        <p class="field__error" id="totp-code-error" role="alert"></p>
+      </div>
+      <div class="actions">
+        <button class="link-button" type="button" data-other-way>Try another way</button>
+        <button class="btn btn--primary" type="submit">Verify</button>
+      </div>
+    </form>
+  </section>
+
+  <section data-step="recovery" hidden>
+    <h1>Two-step verification</h1>
+    <p class="card__lead">Enter one of your recovery codes. Each code works once.</p>
+    <form class="form" method="dialog" novalidate data-recovery-form>
+      <div class="field">
+        <label for="recovery-code">Recovery code</label>
+        <input class="input input--code" id="recovery-code" name="code" autocomplete="off" spellcheck="false" maxlength="20" aria-describedby="recovery-code-error" required />
+        <p class="field__error" id="recovery-code-error" role="alert"></p>
+      </div>
+      <div class="actions">
+        <button class="link-button" type="button" data-other-way>Try another way</button>
+        <button class="btn btn--primary" type="submit">Verify</button>
+      </div>
+    </form>
+  </section>
+
+  <section data-step="passkey" hidden>
+    <h1>Two-step verification</h1>
+    <p class="card__lead">Use the passkey for your account on this device or a phone.</p>
+    <p class="notice notice--error" role="alert" data-second-passkey-error hidden></p>
+    <div class="actions">
+      <button class="link-button" type="button" data-other-way>Try another way</button>
+      <button class="btn btn--primary" type="button" data-second-passkey data-focus>Use passkey</button>
+    </div>
+  </section>
+
+  <section data-step="choose" hidden>
+    <h1>Choose how to sign in</h1>
+    <div class="choices">
+      <button type="button" data-choose="passkey">Use your passkey</button>
+      <button type="button" data-choose="totp">Get a code from your authenticator app</button>
+      <button type="button" data-choose="recovery">Enter a recovery code</button>
+    </div>
+  </section>
+</Auth>
+
+<script>
+  import '../../scripts/account/sign-in.ts';
+</script>
