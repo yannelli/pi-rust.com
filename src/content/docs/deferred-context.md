@@ -4,7 +4,7 @@ description: "Created: 2026-11-04. Last updated: 2026-11-04. pi-rust can keep sk
 group: "Use pi"
 order: 15
 source: "crates/pi-coding-agent/docs/deferred-context.md"
-ref: "v0.12.34"
+ref: "v0.12.35"
 lead: false
 ---
 

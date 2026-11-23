@@ -4,7 +4,7 @@ description: "The commands to start pi in a project, run one prompt, resume a se
 group: "Get started"
 order: 1
 source: "README.md"
-ref: "v0.12.34"
+ref: "v0.12.35"
 lead: true
 ---
 

@@ -4,7 +4,7 @@ description: "Created: 2026-10-30. Last updated: 2026-11-04. pi can run an exter
 group: "Editors and tools"
 order: 32
 source: "crates/pi-coding-agent/docs/acp-providers.md"
-ref: "v0.12.34"
+ref: "v0.12.35"
 lead: false
 ---
 
