@@ -3,6 +3,14 @@ title: "Changelog"
 source: "CHANGELOG.md"
 ---
 
+## 0.12.36
+
+Released November 23, 2026.
+
+### Added
+
+- **mermaid:** render Gantt charts and git graphs ([59cf181](https://github.com/yannelli/pi-rust/commit/59cf181ae0a0eff75aab40a48af3b1cfdbb08769))
+
 ## 0.12.35
 
 Released November 23, 2026.

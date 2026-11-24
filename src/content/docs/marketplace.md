@@ -4,7 +4,7 @@ description: "The marketplace contains native Rust extensions for pi-rust. Each 
 group: "Extensions"
 order: 40
 source: "crates/pi-coding-agent/docs/marketplace.md"
-ref: "v0.12.35"
+ref: "v0.12.36"
 lead: false
 ---
 

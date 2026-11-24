@@ -4,7 +4,7 @@ description: "In interactive mode, type / to see the list of commands. Examples 
 group: "Use pi"
 order: 10
 source: "crates/pi-coding-agent/docs/commands.md"
-ref: "v0.12.35"
+ref: "v0.12.36"
 lead: false
 ---
 
