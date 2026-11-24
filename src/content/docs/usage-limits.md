@@ -4,7 +4,7 @@ description: "Created: 2026-10-30. Last updated: 2026-10-31. /usage, pi usage, a
 group: "Models and logins"
 order: 21
 source: "docs/providers/usage.md"
-ref: "v0.12.36"
+ref: "v0.12.37"
 lead: false
 ---
 

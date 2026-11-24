@@ -3,6 +3,14 @@ title: "Changelog"
 source: "CHANGELOG.md"
 ---
 
+## 0.12.37
+
+Released November 24, 2026.
+
+### Added
+
+- **ai:** fast mode for openai, xai, claude fable 5.2, and cursor claude models ([b229937](https://github.com/yannelli/pi-rust/commit/b2299373c036defe95f2f4f890aaf70b9e4cf16a))
+
 ## 0.12.36
 
 Released November 23, 2026.

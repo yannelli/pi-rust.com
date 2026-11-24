@@ -4,7 +4,7 @@ description: "pi --mode rpc reads JSON commands on stdin and writes responses an
 group: "Editors and tools"
 order: 33
 source: "crates/pi-coding-agent/docs/rpc.md"
-ref: "v0.12.36"
+ref: "v0.12.37"
 lead: false
 ---
 
