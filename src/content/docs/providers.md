@@ -4,7 +4,7 @@ description: "anthropic-messages openai-responses openai-completions openai-code
 group: "Models and logins"
 order: 20
 source: "crates/pi-coding-agent/docs/providers.md"
-ref: "v0.12.37"
+ref: "v0.12.38"
 lead: false
 ---
 
@@ -47,7 +47,7 @@ To log in to Google Antigravity:
 - Cursor runs the model on Cursor's agent service. pi gives its tools to Cursor as MCP tools and runs them itself. The model list, the thinking levels, and the context sizes come from your Cursor account.
 - Google Antigravity runs through the Antigravity ACP server. The agent uses the pi tools, so pi runs each tool. The agent also connects to your MCP servers. The model list and the thinking levels come from the server.
 
-[Subscription providers](https://github.com/yannelli/pi-rust/blob/v0.12.37/docs/providers/subscription-providers.md) has the protocol details.
+[Subscription providers](https://github.com/yannelli/pi-rust/blob/v0.12.38/docs/providers/subscription-providers.md) has the protocol details.
 
 ## ACP agents (pi-rust extension)
 
