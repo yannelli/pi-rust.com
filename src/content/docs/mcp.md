@@ -4,7 +4,7 @@ description: "By default pi connects every enabled MCP server of mcp.json in the
 group: "Editors and tools"
 order: 30
 source: "crates/pi-coding-agent/docs/mcp.md"
-ref: "v0.12.39"
+ref: "v0.12.40"
 lead: false
 ---
 

@@ -4,7 +4,7 @@ description: "Created 2026-10-29. Last updated 2026-11-02. A native extension is
 group: "Extensions"
 order: 41
 source: "docs/extensions/native-protocol.md"
-ref: "v0.12.39"
+ref: "v0.12.40"
 lead: false
 ---
 
@@ -343,9 +343,9 @@ A tool with `renderCall: true` or `renderResult: true` draws its own call or res
 | Method | Params | Result |
 | --- | --- | --- |
 | `ui.notify` | `{ message, type?: "info" \| "warning" \| "error" }` | `null` |
-| `ui.select` | `{ title, options: string[], timeout? }` | string or `null` |
-| `ui.confirm` | `{ title, message, timeout? }` | boolean |
-| `ui.input` | `{ title, placeholder?, prefill?, secret?, timeout? }` | string or `null` |
+| `ui.select` | `{ title, options: string[], timeout?, blockedKind? }` | string or `null` |
+| `ui.confirm` | `{ title, message, timeout?, blockedKind? }` | boolean |
+| `ui.input` | `{ title, placeholder?, prefill?, secret?, timeout?, blockedKind? }` | string or `null` |
 | `ui.editor` | `{ title, prefill? }` | string or `null` |
 | `ui.setStatus` | `{ key, text \| null }` | `null` |
 | `ui.setWidget` | `{ key, lines: string[] \| null, placement?: "aboveEditor" \| "belowEditor" }` | `null` |
@@ -524,6 +524,7 @@ The part ids:
   - `signal` (the request's `$/cancelRequest`) and `timeout` stop the command. A command that ignores SIGTERM gets SIGKILL after 5 seconds.
   - `maxBuffer` limits stdout and stderr together: an integer from 0 to the string limit of the runtime (default 256 MiB), else `-32602`. Over the limit, pi stops the command and answers the output up to the limit with `truncated: true`, `killed: true`, and a nonzero `code`. pi drops an incomplete UTF-8 character at the cut.
   - `killed` is true whenever pi stopped the command.
+  - A command that a signal ended, by pi or otherwise, answers 128 + the signal number as `code`, as a shell does: 143 for SIGTERM and 137 for SIGKILL. pi-rust 0.12.39 and older answer `0`.
   - pi-rust 0.8.6 and older cap the output at 16 MiB with a marker in `stderr`, and send no `truncated`.
 - `events.subscribe` delivers each `pi.events` message on `channel` as an `events.message` notification.
 - `provider.register` takes the declarative part of `pi.registerProvider`: `name`, `baseUrl`, `api` (an existing API id), `apiKey`, `headers`, `models`, and `oauth: { builtin, name? }`. Functions are not available. See [Providers](#providers).

@@ -4,7 +4,7 @@ description: "What pi-rust adds to the TypeScript pi, where its runtime behaves 
 group: "Get started"
 order: 4
 source: "README.md"
-ref: "v0.12.39"
+ref: "v0.12.40"
 lead: true
 ---
 
@@ -17,7 +17,7 @@ pi-rust ports the upstream `pi` CLI and its libraries. This section lists the di
   - A new login stores its OAuth and API endpoints for later refreshes. Older logins without this metadata keep their mainland endpoints.
   - `KIMI_CODE_OAUTH_HOST` and `KIMI_CODE_BASE_URL`, when set, override the saved endpoints. A custom model `baseUrl` in `models.json` stays in effect.
 - Kimi and Moonshot tool requests infer omitted types from enums, constants, and unambiguous schema structure.
-- QuickJS answers `localhost` and loopback reverse queries locally. It rejects `onion` and `invalid` names and their subdomains without contacting a DNS server. If the OS supplies no DNS servers, `getServers()` returns an empty list. Extensions can supply a server with `setServers()`. See [DNS behavior](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/parity/GAPS.md#extension-runtime-pi-js).
+- QuickJS answers `localhost` and loopback reverse queries locally. It rejects `onion` and `invalid` names and their subdomains without contacting a DNS server. If the OS supplies no DNS servers, `getServers()` returns an empty list. Extensions can supply a server with `setServers()`. See [DNS behavior](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/parity/GAPS.md#extension-runtime-pi-js).
 - Extensions run on an embedded QuickJS engine, so pi-rust does not need Node.js. All Node built-in modules load. These include:
   - `zlib` with gzip, brotli, and zstd.
   - `async_hooks` with `AsyncLocalStorage`, and `v8` serialization.
@@ -26,22 +26,25 @@ pi-rust ports the upstream `pi` CLI and its libraries. This section lists the di
   - `node:sqlite` on the bundled SQLite, `node:test` with TAP and spec output, and `repl` over any streams.
   - In-process `inspector` sessions, and `wasi` with a `WebAssembly` global on the wasmi interpreter.
 
-  The APIs that do not work throw `ERR_PI_UNSUPPORTED`. Examples are `crypto.subtle` other than `digest`, and rare `crypto` ciphers such as Camellia. `crates/pi-js/src/unsupported.rs` lists all of them. Native npm addons cannot load on QuickJS.
+  The APIs that do not work throw `ERR_PI_UNSUPPORTED`. Examples are rare `crypto` ciphers such as Camellia, and structured cloning of a `CryptoKey`. `crates/pi-js/src/unsupported.rs` lists all of them. Native npm addons cannot load on QuickJS. Packages that need one, such as pi-deltabox, @ff-labs/pi-fff, and @onkernel/browser-loop (`sharp`), run with `--extension-runtime auto` or `node`.
 
-  To run extensions on Node 22 or later, set `extensionRuntime` to `"node"` or `"auto"`, or use `--extension-runtime` or `PI_EXTENSION_RUNTIME`. On Node, native addons, `child_process.fork`, and V8-only modules work. If Node is missing, pi uses QuickJS. See [Node backend](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/agents/node-compat.md#node-backend).
-  The [extension package audit](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/parity/extension-packages.md) lists 25 tested packages and the engine each one used.
-- IPC handle retries use a pi-js-specific wrapper. Internal handle listeners receive an object with only `close()`. Cluster connections queued to a disconnected worker are not reclaimed. See [Extension runtime](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/parity/GAPS.md#extension-runtime-pi-js).
-- On non-Linux Unix, a concurrent child spawn can inherit an IPC socket before QuickJS marks it close-on-exec. Node closes inherited descriptors in its macOS `posix_spawn` path. See [Platform](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/parity/GAPS.md#platform).
+  To run extensions on Node 22 or later, set `extensionRuntime` to `"node"` or `"auto"`, or use `--extension-runtime` or `PI_EXTENSION_RUNTIME`. On Node, native addons, `child_process.fork`, and V8-only modules work. If Node is missing, pi uses QuickJS. See [Node backend](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/agents/node-compat.md#node-backend).
+  The [extension package audit](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/parity/extension-packages.md) compares the 70 most downloaded npm extension packages with upstream pi and lists the engine each one needs.
+- QuickJS comes from a vendored copy of `rquickjs-sys` 0.14.0 with one fix in `quickjs.c`: a module that waited only for a top-level-await dependency can be imported again later. Unpatched QuickJS-ng never settles that import. See `[patch.crates-io]` in `Cargo.toml`.
+- `VERSION` of `@earendil-works/pi-coding-agent` is the upstream pi version that pi-rust has parity with, so version checks written for upstream releases pass. `PI_RUST_VERSION` is the pi-rust release. Upstream has no such export.
+- IPC handle retries use a pi-js-specific wrapper. Internal handle listeners receive an object with only `close()`. Cluster connections queued to a disconnected worker are not reclaimed. See [Extension runtime](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/parity/GAPS.md#extension-runtime-pi-js).
+- On non-Linux Unix, a concurrent child spawn can inherit an IPC socket before QuickJS marks it close-on-exec. Node closes inherited descriptors in its macOS `posix_spawn` path. See [Platform](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/parity/GAPS.md#platform).
 - In extensions, `ctx.sessionManager` reads return copies of entries, except `getEntries()` of the extension's own session. Upstream pi returns its own entry objects from all reads.
   - As in upstream pi, `getEntries()` of the extension's own session returns the same entry objects on each call, and a message entry holds the message object that the `message_end` handlers received. The `context` of `turn_end` and `agent_before_settle` holds these objects too.
   - The other reads, such as `getEntry()` and `getBranch()`, return new copies on each call. Changes to returned entries do not change the session.
 - The extension SDK still has gaps in child sessions, resource loading, and model runtimes.
   - A `DefaultResourceLoader` with extensions serves one child session for each `reload()`. Its factories run in the caller's extension host.
   - `SettingsManager` supports custom storage and queued writes, with limits on JSON values and live object references.
+  - `createMcpExtension` starts the native MCP of pi-rust. It registers no `/mcp` command and does not take the callback options.
 
-  See [Extension module exports](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/parity/GAPS.md#extension-module-exports) for the remaining differences.
-- `pi.registerProvider(provider)` with an upstream `Provider` object, which has `getModels()` and no string `api`, registers nothing and reports a `register_provider` error. Use `pi.registerProvider(name, { api, baseUrl, models, streamSimple })`. An object with `id` and a string `api` registers as that config. See [Extension module exports](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/parity/GAPS.md#extension-module-exports).
-- The providers that extensions get from `@earendil-works/pi-ai/providers/all` stream, classify, generate images, and resolve auth in Rust. Their API key login asks for one key, including for Amazon Bedrock, Google Vertex AI, and Cloudflare. See [Extension module exports](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/parity/GAPS.md#extension-module-exports).
+  See [Extension module exports](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/parity/GAPS.md#extension-module-exports) for the remaining differences.
+- `pi.registerProvider(provider)` with an upstream `Provider` object registers its models, auth, and stream. pi-rust reads the model list of the object at registration and after each `refreshModels` publish, not on every call, and calls only `streamSimple`. An object without `getModels()` registers as a provider config. See [Extension module exports](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/parity/GAPS.md#extension-module-exports).
+- The providers that extensions get from `@earendil-works/pi-ai/providers/all` stream, classify, generate images, and resolve auth in Rust. Their API key login asks for one key, including for Amazon Bedrock, Google Vertex AI, and Cloudflare. See [Extension module exports](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/parity/GAPS.md#extension-module-exports).
 - When you quit the interactive mode, pi waits at most 3 seconds for the running turn and the `session_shutdown` handlers, then exits. Upstream pi waits until they finish.
 - An abort finishes in less than a second. Upstream pi waits for every tool and handler.
   - The running tools and the extension handlers of the run's last events share 400 ms. Slow handlers keep running without blocking.
@@ -53,7 +56,7 @@ pi-rust ports the upstream `pi` CLI and its libraries. This section lists the di
 - In RPC mode, extension dialogs wait until the client sends a command other than a `get_*` query. `get_commands` answers while a `session_start` handler waits for a dialog. Upstream pi sends dialogs at once and reads no input until its `session_start` handlers finish. See [RPC mode](/docs/rpc/#extension-dialogs).
 - `grep` and `find` use the Rust `ignore` crate, so pi-rust does not download `rg` or `fd`.
 - The version check and `pi update --self` use the releases of this repository.
-- Newer models come from the catalog at `pi-rust.com` (`PI_CATALOG_URL` overrides it), which this repository generates from upstream's catalog generator at the upstream commit of the latest release. Upstream pi reads its catalog from `pi.dev`. See [Model catalog](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/model-catalog.md).
+- Newer models come from the catalog at `pi-rust.com` (`PI_CATALOG_URL` overrides it), which this repository generates from upstream's catalog generator at the upstream commit of the latest release. Upstream pi reads its catalog from `pi.dev`. See [Model catalog](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/model-catalog.md).
 - `/bug` offers Upload Report, Open GitHub Issue, and Export as Zip. Upload Report sends the report privately to `pi-rust.com` (`PI_BUG_REPORT_URL` overrides it). Open GitHub Issue writes the zip archive and opens a public prefilled issue form on `yannelli/pi-rust`; you submit it and attach the zip yourself. Upstream pi uploads the report to its Radius gateway (`radius.pi.dev`).
 - Install telemetry is off unless you turn it on with the `enableInstallTelemetry` setting or `PI_TELEMETRY=1`. When it is on, pi-rust sends the anonymous install and update ping (version and `User-Agent` only) to `pi-rust.com` (`PI_TELEMETRY_URL` overrides it). Upstream pi turns install telemetry on by default and pings `pi.dev`. For the same reason, the extension SDK's `SettingsManager.getEnableInstallTelemetry()` returns `false` when the setting is not set. Upstream returns `true`.
 - `/share` can upload the session's HTML export to your pi-rust.com account. Set `sessionShareDestination` to `"pi-rust"`; if you are not signed in, the share first signs you in with a device code, and `/logout` signs you out. With `sessionShareViewer` set to `"pi-rust"`, gist links open on `pi-rust.com/session/` and `"auto"` uses the account first when you are signed in. By default both work as upstream pi: Radius or a gist, with gist links on `pi.dev`. `PI_SHARE_URL` replaces the `pi-rust.com` service origin. See [Settings](/docs/settings/#session-sharing).
@@ -68,7 +71,7 @@ pi-rust ports the upstream `pi` CLI and its libraries. This section lists the di
   - On Unix, it also takes at most 64 KiB more per stream, if that data is readable without waiting.
   - On Windows, it starts no further read.
 
-  See [Platform](https://github.com/yannelli/pi-rust/blob/v0.12.39/docs/parity/GAPS.md#platform).
+  See [Platform](https://github.com/yannelli/pi-rust/blob/v0.12.40/docs/parity/GAPS.md#platform).
 - When you clear the message queue, pi removes only your queued messages. Upstream pi drops queued extension messages with the queue.
   - Esc while the agent works, the dequeue key, and the RPC `clear_queue` command clear the queue.
   - Queued extension messages, such as subagent or background task results, stay queued.
