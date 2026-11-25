@@ -4,7 +4,7 @@ description: "pi --mode acp runs pi as an Agent Client Protocol (ACP) server ove
 group: "Editors and tools"
 order: 31
 source: "crates/pi-coding-agent/docs/acp.md"
-ref: "v0.12.38"
+ref: "v0.12.39"
 lead: false
 ---
 

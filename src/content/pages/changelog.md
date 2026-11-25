@@ -3,6 +3,14 @@ title: "Changelog"
 source: "CHANGELOG.md"
 ---
 
+## 0.12.39
+
+Released November 24, 2026.
+
+### Fixed
+
+- **auth:** save a token refresh that a replaced session started before exit ([992f448](https://github.com/yannelli/pi-rust/commit/992f44824f61e9763dab3aa7436d9d8aa24a5c98))
+
 ## 0.12.38
 
 Released November 24, 2026.

@@ -4,7 +4,7 @@ description: "It downloads the latest release for your platform. It compares the
 group: "Get started"
 order: 2
 source: "crates/pi-coding-agent/docs/install.md"
-ref: "v0.12.38"
+ref: "v0.12.39"
 lead: false
 ---
 

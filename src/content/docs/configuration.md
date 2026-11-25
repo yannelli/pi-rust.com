@@ -4,7 +4,7 @@ description: "pi-rust uses your existing pi folder: logins, settings, models, ke
 group: "Get started"
 order: 3
 source: "README.md"
-ref: "v0.12.38"
+ref: "v0.12.39"
 lead: true
 ---
 
