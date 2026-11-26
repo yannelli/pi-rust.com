@@ -79,14 +79,14 @@
   },
   "parity": {
     "url": "https://github.com/yannelli/pi-rust/issues/30",
-    "date": "2026-11-25",
-    "upstreamVersion": "1.6.0",
+    "date": "2026-11-26",
+    "upstreamVersion": "1.6.1",
     "syncedVersion": "1.4.0",
     "syncedDate": "2026-10-27",
     "sections": [
       {
         "name": "Upstream commits",
-        "missing": 350,
+        "missing": 385,
         "onlyInPiRust": 0,
         "allowlisted": 6
       },
@@ -98,7 +98,7 @@
       },
       {
         "name": "Settings keys",
-        "missing": 2,
+        "missing": 3,
         "onlyInPiRust": 6,
         "allowlisted": 12
       },
@@ -116,8 +116,8 @@
       },
       {
         "name": "Model catalog",
-        "missing": 23,
-        "onlyInPiRust": 16,
+        "missing": 26,
+        "onlyInPiRust": 20,
         "allowlisted": 0
       },
       {
@@ -128,9 +128,9 @@
       },
       {
         "name": "Extension module exports",
-        "missing": 10,
+        "missing": 13,
         "onlyInPiRust": 12,
-        "allowlisted": 0
+        "allowlisted": 1
       },
       {
         "name": "Node built-ins",
