@@ -4,7 +4,7 @@
   "version": "0.12.40",
   "publishedAt": "2026-11-25T09:45:17Z",
   "releaseUrl": "https://github.com/yannelli/pi-rust/releases/tag/v0.12.40",
-  "stars": 25,
+  "stars": 26,
   "license": "MIT",
   "assets": [
     {
@@ -79,27 +79,27 @@
   },
   "parity": {
     "url": "https://github.com/yannelli/pi-rust/issues/30",
-    "date": "2026-11-26",
+    "date": "2026-11-27",
     "upstreamVersion": "1.6.1",
     "syncedVersion": "1.4.0",
     "syncedDate": "2026-10-27",
     "sections": [
       {
         "name": "Upstream commits",
-        "missing": 385,
+        "missing": 546,
         "onlyInPiRust": 0,
         "allowlisted": 6
       },
       {
         "name": "CLI flags",
-        "missing": 0,
+        "missing": 1,
         "onlyInPiRust": 1,
         "allowlisted": 6
       },
       {
         "name": "Settings keys",
         "missing": 3,
-        "onlyInPiRust": 6,
+        "onlyInPiRust": 7,
         "allowlisted": 12
       },
       {
