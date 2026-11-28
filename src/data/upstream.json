@@ -79,14 +79,14 @@
   },
   "parity": {
     "url": "https://github.com/yannelli/pi-rust/issues/30",
-    "date": "2026-11-27",
-    "upstreamVersion": "1.6.1",
+    "date": "2026-11-28",
+    "upstreamVersion": "1.7.0",
     "syncedVersion": "1.4.0",
     "syncedDate": "2026-10-27",
     "sections": [
       {
         "name": "Upstream commits",
-        "missing": 546,
+        "missing": 575,
         "onlyInPiRust": 0,
         "allowlisted": 6
       },
